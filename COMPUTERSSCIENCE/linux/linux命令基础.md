@@ -143,3 +143,4 @@
         (2) 直接删掉该swp文件即可
 ```
 
+* 在linux中，可以直接在/usr/share/vim/vimrc修改
