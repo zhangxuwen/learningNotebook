@@ -354,3 +354,114 @@ Go具备两种大小的复数`complex64`和`complex128`，二者分别由`float3
 
 文字符号的序列表示成`int32`值序列，这种表示方式称作`UTF-32`或`UCS-4`，每个`Unicode`码点的编码长度相同，都是`32`位。
 
+#### UTF-8
+
+```import "unicode/utf8"```
+
+`UTF-8`以字节为单位对`Unicode`码点做变长编码。
+
+* 若最高位为`0`，则标示着它是`7`为的`ASCII`码，其文字符号的编码仅占`1`字节；若最高几位是`110`，则文字符号的编码占用`2`个字节，第二个字节以`10`开始。更长的编码以此类推。
+
+#### 字符串和字节slice
+
+4个标准包对字符串操作特别重要：`bytes`，`strings`，`strconv`和`unicode`。
+
+* 字符串包含一个字节数组，创建后它就无法改变。相反地，字节`slice`的元素允许随意修改。
+
+`strings`包具备下面6个函数：
+
+```go
+func Contains(s, substr string) bool
+func Count(s, sep string) int
+func Fields(s string) []string
+func HasPrefix(s, prefix string) bool
+func Index(s, sep string) int
+func Join(a []string, sep string) string
+```
+
+`bytes`包里面的对应函数为：
+
+```go
+func Contains(b, subslice []byte) bool
+func Count(s, sep []byte) int
+func Fields(s []byte) [][]byte
+func HasPrefix(s, prefix []byte) bool
+func Index(s, sep []byte) int
+func Join(s [][]byte, sep []byte) []byte
+```
+
+`bytes`包为高效处理字节`slice`提供了`Buffer`类型。`bytes.Buffer`类型无须初始化，原因是零值本来就有效。
+
+* 若要在`bytes.Buffer`变量后面添加任意文字符号的`UTF-8`编码，最好使用`bytes.Buffer`的`WriteRune`方法，而追加`ASCII`字符，则使用`WriteByte`亦可。
+
+#### 字符串和数字的相互转换
+
+* 要将整数转换成字符串，一种选择是使用`fmt.Sprintf`，另一种做法是用函数`strconv.Itoa("integer to ASCII")`。
+* `strconv`包内的`Atoi`函数或`ParseInt`函数用于解释表示整数的字符串，而`ParseUint`用于无符号整数。
+
+```go
+x, err := strconv.Atoi("123")				// x 是整型
+x, err := strconv.ParseInt("123", 10, 64)	// 十进制，最长为64位
+```
+
+````ParseInt`的第三个参数指定结果必须匹配何种大小的整型```
+
+
+
+### 常量
+
+常量是一种表达式，其可以保证在编译阶段就计算出表达式的值，并不需要等到运行时，从而使编译器得以知晓其值。
+
+* 所有常量本质上都属于基本类型：布尔型、字符串或数字。
+
+* 常量声明可以同时指定类型和值，如果没有显示指定类型，则类型根据右边的表达式推断。
+* 若同时声明一组常量，除了第一项之外，其他项在等号右侧的表达式都可以省略，这一位置会复用前面一项的表达式及其类型。
+
+#### 常量生成器`iota`
+
+常量声明中，`iota`从0开始取值，逐项加1。
+
+```go
+type Weekday int
+const (
+	Sunday Weekday = iota
+    Monday
+    Tuesday
+    Wednesday
+    Thursday
+    Friday
+    Saturday
+)
+```
+
+#### 无类型常量
+
+从属类型待定的常量共有6种，分别是`无类型布尔`，`无类型浮点数`，`无类型复数`，`无类型字符串`。
+
+* 类似地，`true`和`false`是无类型布尔值，而字符串字面量则是无类型字符串。
+* 只有常量才可以是无类型的。
+
+
+
+### 复合数据类型
+
+复合数据类型是由基本数据类型以各种方式组合而构成的。
+
+#### 数组
+
+数组是具有固定长度且拥有零个或者多个相同数据类型元素的序列。
+
+* 相比数组，`slice`很多场合下使用得更多。
+
+* 默认情况下，一个新数组中的元素初始值位元素类型的零值，同时可以用`数组字面量`初始化。
+
+```go
+var r [3]int = [3]int{1, 2} // 1, 2, 0
+```
+
+* 如果省略号`...`出现在数组长度的位置，那么数组的长度由初始化数组的元素个数决定。
+
+```go
+q := [...]int{1, 2, 3} // [3]int
+```
+
