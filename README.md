@@ -19,12 +19,16 @@ notebook --> math
 notebook --> physics
 notebook --> Robot
 notebook --> OpenSource
+
 CS --> CN(ComputerNetworking)
 CS --> COAA(Computer Organization and Architecture)
 CS --> go
 CS --> java
 CS --> linux
-CS --> 前端
+CS --> BD(Backend)
+CS --> FD(Front end)
+CS --> OS(Operator System)
+
 math --> ML(Machine Learning)
 math --> NT(number theory)
 ```
