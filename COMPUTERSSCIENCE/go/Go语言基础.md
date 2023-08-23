@@ -1030,5 +1030,358 @@ type ReadWriter interface {
 * 指针类型肯定不是实现接口的唯一类型，即使是那些包含了会改变接受者方法的接口类型，也可以有`golang`的其他引用类型来实现。
 * 从具体类型出发、提取其共性而得出的每一种分组方式都可以表示为一种接口类型。
 
+### 实验：接口能不能调用赋值的类型其他方法
+
+```go
+package main
+
+import "fmt"
+
+type a struct {
+        a_str string
+        b_str string
+}
+
+type Ralue interface {
+        sstring() string
+}
+
+func (val a) sstring() string {
+        return val.a_str
+}
+
+func (val *a) resString() string {
+        return val.b_str
+}
 
 
+func main() {
+        var w Ralue
+        var test a
+        test.a_str = "kk"
+        test.b_str = "hh"
+        w = test
+        fmt.Println(w.sstring()) // "kk"
+        fmt.Println(test.resString()) // "hh"
+        fmt.Println(w.resString()) // "w.resString undefined (type Ralue has no field or method resString)"
+}
+```
+
+看来是不可以的。
+
+### 使用flag.Value来解析参数
+
+* 标准接口`flag.Value`帮助定义行标志。
+* 支持自定义类型其实也不难，只须定义一个满足`flag.Value`接口的类型。
+
+```go
+package flag
+
+// Value 接口代表了存储在标志内的值
+type Value interface {
+    String() string
+    Set(string) error
+}
+```
+
+### 接口值
+
+从概念来说，一个接口类型的值（简称接口值）其实有两部分：一个具体类型和该类型的一个值。二者称为接口的动态类型和动态值。
+
+* `golang`中，类型仅仅是一个编译时的概念，所以类型不是一个值。在概念模型中，用**类型描述符**来提供每个类型的具体信息，比如它的名字和方法。
+* 接口值可以用`==`和`!=`操作符来做比较。如果两个接口值都是`nil`或者二者的动态类型完全一致且二者动态值相等（使用动态类型的`==`操作符来做比较），那么两个接口值相等。因为接口值是可以比较的，所以它们可以作为`map`的键，也可以作为`switch`语句的操作数。
+* 在比较两个接口值时，如果两个接口值的动态类型一致，但对应的动态值是不可比较的，那么这个比较会以崩溃的方式失败。从这点看，接口类型是非平凡的。
+
+#### 注意：含有空指针的非空接口
+
+空的接口值与仅仅动态值为`nil`的接口值是不一样的。
+
+### 使用```sort.Interface```来排序
+
+`sort.Interface`接口指定通用排序算法和每个具体的序列类型之间的协议。这个接口的实现确定了序列的具体布局（经常是一个`slice`），以及元素期望的排序方式。
+
+* 一个原地排序算法需要知道三个信息：序列长度、比较两个元素的含义以及如何交换两个元素，所以`sort.Interface`接口就有三个办法。
+
+```go
+package sort
+
+type Interface interface {
+    Len() int
+    Less(i, j int) bool // i, j是序列元素的下标
+    Swap(i, j int)
+}
+```
+
+要对序列排序，需要先确定一个实现了如上三个方法的类型，接着把`sort.Sort`函数应用到上面这类方法的实例上。
+
+* `sort.Reverse`使用了一个重要概念：组合。
+
+```go
+package sort
+
+type reverse struct { Interface } // that is, sort.Interface
+
+func (r reverse) Less(i, j int) bool { return r.Interface.Less(j, i) }
+
+func Reverse(data Interface) Interface { return reverse{ data } }
+```
+
+`sort`包定义了一个未导出的类型`reverse`，这个类型是一个嵌入了`sort.Interface`的结构。`reverse`的`Less`方法直接调用了内嵌的`sort.Interface`值的`Less`方法，但只交换传入的下标，就可以颠倒排序的结果。
+
+`reverse`的另外两个方法`Len`和`Swap`，由内嵌的`sort.Interface`隐式提供。导出的函数`Reverse`则返回一个包含原始`sort.Interface`值的`reverse`实例。
+
+### ```http.Handler```接口
+
+作为服务端`API`基础的`http.Handler`接口。
+
+```go
+package http
+
+type Handler interface {
+    ServeHTTP(W ResponseWriter, r *Request)
+}
+
+func ListenAndServe(address string, h Handler) error
+```
+
+`ListenAndServe`函数需要一个服务器地址，比如`"localhost:8000"`，以及一个`Handler`接口的实例。
+
+* 普通处理`URL`
+
+```go
+// req *http.Request
+
+req.URL.Path
+```
+
+* 普通地处理请求参数
+
+```go
+// /xxx?item=value
+
+switch req.URL.Path{
+    case "/xxx":
+		item := req.URL.Query().Get("item")
+    	/*
+    		xxx
+    	*/
+}
+```
+
+`URL`的`Query`方法，把`Http`的请求参数解析为`map`，或者更精确来讲，解析为一个`multimap`，由`net/url`包的`url.Values`类型实现。
+
+* `net/http`包提供了一个请求多工转发器`ServeMux`，用来简化`URL`和处理程序之间的关联。
+* 满足同一个接口的多个类型是可以**互相替代**的，`Web`服务器可以把请求分发到任意一个`http.Handler`。
+* 对于一个更复杂的应用，多个`ServeMux`会组合起来，用来处理更复杂的分发需求。
+
+`ServeMux`例子
+
+```go
+mux := http.NewServeMux()
+mux.Handle(URL1 string, http.HandlerFunc(mothod.func1))
+max.Handle(URL2 string, http.HandlerFunc(mothod.func2))
+log.Fatal(http.ListenAndServe(ip_port string, mux))
+
+func (md mothod) func1(w http.ResponseWriter, req *http.Request) {
+    /*
+    	xxx
+    */
+}
+
+func (md mothod) func2(w http.ResponseWriter, req *http.Request) {
+    /*
+    	xxx
+    */
+}
+```
+
+表达式`http.HandlerFunc(xxx.func)`其实是类型转换，而不是函数调用。注意，`http.HandlerFunc`是一个类型。
+
+``` 
+package http
+
+type HandlerFunc func(w ResponseWriter, r *Request)
+
+func (f HandlerFunc) ServeHTTP(w ResponseWriter, r *Request) {
+	f(w, r)
+}
+```
+
+* `net/http`包提供一个全局的`ServeMux`实例`DefaultServeMux`，以及包级别的注册函数`http.Handle`和`http.HandlerFunc`。要让`DefaultServeMux`作为服务器的主处理程序，无须把它传给`ListenAndServe`，直接传`nil`即可。
+
+### ```error```接口
+
+这只是一个接口类型。
+
+```go
+type error interface {
+    Error() string
+}
+```
+
+构造`error`最简单的方法是调用`errors.New`，它会返回一个包含指定的错误消息的新`error`实例。
+
+* 完整的`error`包只有如下4行代码。
+
+```go
+package errors
+
+func New(text string) error { return &errorString{ text } }
+
+type errorString struct { text string }
+
+func (e *errorString) Error() string { return e.text }
+```
+
+* 底层的`errorString`类型是一个结构，而没有直接用字符串，主要是为了避免将来无意间的布局变更。满足`error`接口的是`*errorString`指针，而不是原始的`errorString`，主要是为了让每次`New`分配的`error`实例都互不相等。
+
+```go
+fmt.Println(errors.New("EOF") == errors.New("EOF"))		// false
+```
+
+* 直接调用`errors.New`比较罕见，因为有一个更易用的封装函数`fmt.Errorf`，它还额外提供了字符串格式化功能。
+
+```go
+package fmt
+
+import "errors"
+
+func Errorf(format string, args ...interface{}) error {
+    return errors.New(Sprintf(format, args...))
+}
+```
+
+### 类型断言
+
+类型断言是一个作用在接口值上的操作，写出来类似于`x.(T)`，其中`x`是一个接口类型的表达式，而`T`是一个类型（称为断言类型）。类型断言会检查作为操作数的动态类型是否满足指定得断言类型。如果断言类型`T`是一个具体类型，那么类型断言会检查`x`的动态类型是否就是`T`。
+
+* 如果断言类型`T`是一个接口类型，那么类型断言检查`x`的动态类型是否满足`T`。如果检查成功，动态值并没有提取出来，结果仍然是一个接口值，接口值的类型和值部分也没有变更，只是结果的类型为接口类型`T`。
+* 如果类型断言出现在需要两个结果的赋值表达式中，那么断言不会在失败时崩溃，而是会多返回一个布尔型的返回值来指示断言是否成功。
+
+```go
+if w, ok := w.(*os.File); ok {
+    // ...use w...
+}
+```
+
+返回值的名字与操作数变量名一致，原有的值就被新的返回值掩盖了。
+
+### 使用类型断言来识别错误
+
+`os`包中有三类原因通常必须单独处理：文件已存储（创建操作），文件没找到（读取操作）以及权限不足。
+
+```go
+package os 
+
+func IsExist(err error) bool
+func IsNotExist(err error) bool
+func IsPermission(err error) bool
+```
+
+### 通过接口类型断言来查询特征
+
+给一个特定类型多定义一个方法，就隐式地接受了一个特定约定。
+
+### 类型分支
+
+接口有两种不同的风格。
+
+1. 接口上的各种方法突出了满足这个接口的具体类型之间的相似性，但隐藏了各个具体类型的布局和各自特有的功能。这种风格强调了方法，而不是具体类型。
+2. 充分利用·了接口值能够容纳各种具体类型的能力，它把接口作为这些类型的联合（`union`）来使用。这种风格的接口使用方式称为`可识别联合`。
+
+
+
+## `goroutine`和通道
+
+### `goroutine`
+
+在`golang`中，每一个并发执行的活动称为`goroutine`。当一个程序启动时，只有一个`goroutine`来调用`main`函数，称它为主`goroutine`。新的`goroutine`通过`go`语句进行创建。`goroutine`与通道`channel`支持CSP（通信顺序进程）模型。
+
+* 语法上，一个`go`语句是在普通的函数或者方法调用前加上`go`关键字前缀。
+* `main`函数返回，当它发生时，所有的`goroutine`都暴力地直接终结，然后程序退出。
+
+### 通道
+
+通道是可以让一个`goroutine`发送特定值到另一个`goroutine`的通信机制。每一个通道是一个具体类型的导管，叫做通道的**元素类型**。一个有`int`类型元素的通道写为`chan int`。
+
+```go
+ch := make(chan int) // ch 的类型是`chan int`
+```
+
+通道是一个使用`make`创建的数据结构的引用。当复制或者作为参数传递到一个函数是，复制的是引用，这样调用者和被调用者都引用同一份数据结构。和其他引用类型一样，通道的零值是`nil`。
+
+* 通道有两个主要操作：发送（`send`）和接收（`receive`），两者统称为`通信`。
+
+```go
+ch <- x		// 发送语句
+x = <- ch	// 赋值语句中的接收表达式
+<- ch		// 接收语句，丢弃结果
+```
+
+* 通道支持第三个操作：关闭（`close`），它设置一个标志位来指示值当前已经发送完毕。关闭后的发送操作将导致宕机。在一个已经关闭的通道上进行接受操作，将获取所有已经发送的值，直到通道为空。
+
+```go
+close(ch)
+```
+
+* 通道还分为无缓冲通道和缓冲通道。
+
+```go
+ch = make(chan int)		// 无缓冲通道
+ch = make(chan int, 0)	// 无缓冲通道
+ch = make(chan int, 3)	// 容量为3的缓冲通道
+```
+
+#### 无缓冲通道
+
+无缓冲通道上的发送操作将会阻塞，直到另一个`goroutine`在对应的通道上执行接收操作，这时值传送完成，两个`goroutine`都可以继续执行。
+
+* 使用无缓冲通道进行的通信导致发送和接收`goroutine`同步化。因此，无缓冲通道也称为同步通道。
+
+#### 管道
+
+通道可以用来连接`goroutine`，这样一个的输出是另一个的输入。这个叫管道（`pipeline`）。
+
+* 没有一个直接的方式来判断是否通道已经关闭，但是这里有接收操作的一个变种，它产生两个结果：接收到的通道元素，以及一个布尔值（通常称为`ok`）。
+* 通道也是可以通过垃圾回收器根据它是否可以访问来决定是否回收它，而不是根据它是否关闭。（不要将这个`close`操作和对于文件的`close`操作混淆。当结束的时候对每一个文件调用`Close`方法是非常重要的。）
+
+#### 单向通道类型
+
+`golang`的类型系统提供了单向通道类型，仅仅导出发送或接收操作。如类型`chan <- int`是一个只能发送的通道，允许发送但不允许接收。反之，类型`<- chan int`是一个只能接收的`int`类型通道，允许接收但是不能发送。
+
+* 在任何赋值操作中将双向通道转换为单向通道都是允许的，但是反过来是不行的。
+
+#### 缓冲通道
+
+缓冲通道上的发送操作在队列的尾部插入一个元素，接受操作从队列的头部移除一个元素。
+
+* 程序需要知道通道缓冲区的容量，可以通过调用内置的`cap`函数获取它。
+
+* 无缓冲通道提供强同步保障，因为每一次发送都需要和一次对应的接收同步；对于缓冲通道，这些操作则是解耦的。
+
+### 并行循环
+
+* 完全独立的子问题组成的问题称为**高度并行**。高度并行的问题是最容易实现并行的，有许多并行机制来实现线性扩展。
+* `sync.WaitGroup`作为计数器类型，可以被多个`goroutine`安全地操作，然后有一个办法一直等到它变为`0`。
+
+### 使用`select`多路复用
+
+* `time.Tick`函数返回一个通道，它定期发送事件，像一个节拍器一样。
+* `select`可以实现多路复用
+
+```go
+select {
+    case <- ch1:
+    	// ...
+    case x := <- ch2:
+    	// ... use x ...
+    case ch3 <- y:
+    	// ...
+    default:
+    	// ...
+}
+```
+
+`select`一直等待，直到一次通信来告知有一些情况可以执行。
+
+* 如果多个情况同时满足，`select`随机选择一个，这样保证每一个通道有相同的机会会被选中。
