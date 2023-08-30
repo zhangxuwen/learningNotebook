@@ -79,7 +79,7 @@ type Handler interface {
   * `http`包有一个`Handle`函数
   * `ServerMux struct`也有一个`Handle`方法
 * 如果你调用`http.Handle`，实际上调用的是`DefaultServeMux`上的`Handle`方法
-  * `DefaultServeMux`就是`ServerMux`的指针变量
+  * ​	`DefaultServeMux`就是`ServerMux`的指针变量
 
 
 
@@ -508,3 +508,741 @@ type ResponseWriter interface {
 * `Header`方法
   * `Header`方法返回`headers`的`map`，可以进行修改
   * 修改后的`header`将会体现在返回给客户端的`HTTP`响应里
+
+
+
+### 内置的`Response`
+
+* `NotFound`函数，包装一个`404`状态码和一个额外的信息
+* `ServeFile`函数，从文件系统提供文件，返回给请求者
+* `ServeContent`函数，它可以把实现了`io.ReadSeeker`接口的任何东西里面的内容返回给请求者
+  * 还可以处理`Range`请求（范围请求），如果只请求了资源的一部分内容，那么`ServeContent`就可以如此响应。而`ServeFile`或`io.Copy`则不行
+* `Redirect`函数，告诉客户端重定向到另一个`URL`
+
+
+
+### 模板
+
+* `web`模板就是预先设计好的`HTML`页面，它可以被模板引擎反复的使用，来产生`HTML`页面
+
+* `golang`的标准库提供了`text/template`，`html/template`两个模板库
+
+* 模板引擎可以合并模板与上下文数据，产生最终的`HTML`
+
+* 两种理想的模板引擎：
+
+  1. 无逻辑模板引擎
+     * 通过占位符，动态数据被替换到模板中
+       * 不做任何逻辑处理，只做字符串替换
+         * 处理完全由`handler`来完成
+       * 目标是展示层和逻辑的完全分离
+  2. 逻辑嵌入模板引擎
+     * 编程语言被嵌入到模板中
+     * 在运行时由模板引擎来执行，也包含替换功能
+     * 功能强大
+     * 逻辑代码遍布`handler`和模板，难以维护
+
+* `golang`的模板引擎：
+
+  1. 主要使用的是`text/template`，`HTML`相关部分使用了`html/template`，是个混合体
+  2. 模板可以完全无逻辑，但又具有足够的嵌入特性
+  3. 和大多数模板引擎一样，`Go Web`的模板位于无逻辑和嵌入逻辑之间的某个地方
+
+* `golang`模板引擎的工作原理
+
+  * 在`Web`应用中，通常时由`handler`来触发模板引擎
+  * `handler`调用模板引擎，并将使用的模板传递给引擎
+    * 通常时一组模板文件和动态数据
+  * 模板引擎生成`HTML`，并将其写入到`RespnseWriter`
+  * `ResponseWriter`再将它加入到`HTTP`响应中，返回给客户端
+
+  <img src="img/template.png">
+
+* 模板必须是可读的文本格式，扩展名任意。对于`Web`应用通常是`HTML`
+  * 里面内会内嵌一些命令（叫做`action`）
+* `text/template`是通用模板引擎，`html/template`是`HTML`模板引擎
+* `action`位于双层花括号之间：`{{.}}`
+  * 这里的`.`就是一个`action`
+  * 它可以命令模板引擎将其替换成一个值
+
+
+
+### 使用模板引擎
+
+1. 解析模板源（可以是字符串或模板文件），从而创建一个解析好的模板的`struct`
+
+2. 执行解析好的模板，并传入`ResponseWriter`和数据
+
+   * 这会触发模板引擎组合解析好的模板和数据，来产生最终的`HTML`，并将它传递给`ResponseWriter`
+
+   example
+
+   ```go
+   /*
+   import (
+   	"fmt"
+   	"text/template"
+   )
+   */
+   func porcess(w http.ResponseWriter, r *http.Request) {
+       html, _ := template.ParseFiles("test.html")
+       html.Execute(w, "test")
+   }
+   ```
+
+
+
+### 解析模板
+
+
+
+#### ParseFile
+
+* 解析模板文件，并创建一个解析好的模板`struct`，后续可以被执行
+* `ParseFile`函数是`Template struct`上`ParseFile`方法的简单调用
+* 调用`ParseFiles`后，会创建一个新的模板，模板的名字是文件名
+* `New`函数
+* `ParseFiles`的参数数量可变，但只返回一个模板
+  * 当解析多个文件时，第一个文件作为返回的模板（名、内容），其余的作为`map`，供后续执行使用
+
+#### `ParseGlob`
+
+* 使用模式匹配来解析特定的文件
+
+#### `Parse`
+
+* 可以解析字符串模板，其他方式最终都会调用`Parse```
+
+#### `Lookup`方法
+
+* 通过模板名来寻找模板，如果没找到就返回`nil`
+
+#### `Must`函数
+
+* 可以包裹一个函数，返回到一个模板的指针和一个错误
+  * 如果错误不为`nil`，那么就`panic`
+
+
+
+### 执行模板
+
+#### `Execute`
+
+* 参数是`ResponseWriter`、`数据`
+  * 单模板：很适用
+  * 模板集：只用第一个模板
+
+#### `ExecuteTemplate`
+
+* 参数是：`ResponseWriter`、模板名、数据
+* 模板集：很适用
+
+
+
+### 模板-`Action`
+
+
+
+* `Action`就是`golang`模板中嵌入的命令，位于两组花括号之间`{{xxx}}`
+
+* `.`就是一个`Action`，而且是最重要的一个。它代表了传入模板的数据
+
+* `Action`主要分为五类：
+
+  * 条件类
+
+    * ```go
+      {{ if arg }}
+      	some content
+      {{ end }}
+      ```
+
+    * ```go
+      {{ if arg }}
+      	some content
+      {{ else }}
+      	some content
+      {{ end }}
+      ```
+
+  * 迭代/遍历类
+
+    * ```go
+      {{ range array }}
+      	Dot is set to the element {{.}}
+      {{ end }}
+      ```
+
+    * 这类`Action`用来遍历数组、`slice`、`map`或`channel`等数据结构
+
+      * `.`用来表示每次迭代循环中的元素
+
+    * 回落机制
+
+  * 设置类
+
+    * ```go
+      {{ with arg }}
+      	Dot is set to arg
+      {{ end }}
+      ```
+
+    * 它允许在指定范围内，让`.`来表示其它指定的值（`arg`）
+
+    * 也有回落机制
+
+  * 包含类
+
+    * ```go
+      {{ template "name" }}
+      ```
+
+    * 它允许你在模板中包含其它的模板
+
+    * ```go
+      {{ template "name" arg }}
+      ```
+
+    * 给被包含模板传递参数
+
+  * 定义类
+
+    * `define action`
+
+
+
+### 模板-参数
+
+* 参数就是模板里面用到的值
+  * 可以是`bool`、整数、`string`...
+  * 也可以是`struct`、`struct`的字段、数组的`key`等
+* 参数可以是变量、方法（返回单个值或返回一个值和一个错误）或函数
+* 参数可以是一个点`.`，也就是传入模板引擎的那个值
+
+
+
+### 模板-在`Action`中设置变量
+
+* 可以在`action`中设置变量，变量以`$`开头：
+
+  * `$variable := value`
+
+* 一个迭代`action`的例子：
+
+  ```go
+  {{ range $key, $value := . }}
+  	The key is {{ $key }} and the value is {{ $value }}
+  {{ end }}
+  ```
+
+
+
+### 模板-管道（`pipeline`）
+
+* 管道是按顺序连接到一起的参数、函数和方法
+
+  * 和`Unix`的管道类似
+
+* ```go
+  example: {{ p1 | p2 | p3 }}
+  	// p1、p2、p3要么是参数，要么是函数
+  ```
+
+* 管道允许我们把参数的输出发给下一个参数、下一个参数由管道（`|`）分隔开
+
+
+
+### 模板-函数
+
+* 参数可以是一个函数
+
+* `golang`模板引擎提供了一些基本的内置函数，功能比较有限。例如`fmt.Sprint`的各类变体等
+
+* 开发者可以自定义函数
+
+  * 可以接收任意数量的输入参数
+
+  * 返回
+
+    * 一个值
+    * 一个值 + 一个错误
+
+  * 如何自定义函数
+
+    * ```go
+      tmeplate.Func(funcMap FuncMap) *Template
+      ```
+
+    * ```go
+      type FuncMap map[string]interface{}
+      	// value 是函数
+      		// 可以有任意数量的参数
+      		// 返回单个值的函数或返回一个值+一个错误的函数
+      ```
+
+    1. 创建一个`FuncMap`（`map`类型）
+       * `key`是函数名
+       * `value`就是函数
+    2. 把`FuncMap`附加到模板
+
+    * 常见用法：`template.New("").Func(funcMap).Parse(...)`
+      * 调用顺序非常重要
+    * 可以在管道中使用
+    * 也可以作为正常函数使用
+    * 管道更强大且灵活
+
+* 内置函数：
+
+  * `define`、`template`、`block`
+  * `html`、`js`、`urlquery`。对字符串进行转义，防止安全问题
+    * 如果是`Web`模板，那么不会需要经常使用这些函数
+  * `index`
+  * `print/printf/println`
+  * `len`
+  * `with`
+
+
+
+### 组合模板
+
+
+
+#### `Layout`模板
+
+* `Layout`模板就是网页中固定的部分，它可以被多个网页重复使用
+
+
+
+#### `Layout`模板的制作
+
+* `include`（包含）`action`的形式：`{{ template "name" . }}`
+  * 以这种方式做`layout`模板是不可行的
+
+
+
+#### 使用`block action`定义默认模板
+
+```go
+{{ block arg }}
+	Dot is set to arg
+{{ end }}
+```
+
+* `block action`可以定义模板，并同时就使用它
+* `template`：模板必须可用
+* `block`：模板可以不存在
+
+
+
+### 模板-逻辑运算符
+
+* `eq/ne`：相等或者不相等
+* `lt/gt`：小于或者大于
+* `le/ge`：小于等于或者大于等于
+* `and `：逻辑与
+* `or`：逻辑或
+* `not`：逻辑非
+
+example：
+
+```html
+<h1>
+    Home
+</h1>
+<h2>
+    {{ if eq . "Hello World" }}
+    !!!
+    {{ end }}
+</h2>
+```
+
+
+
+
+
+### `golang`数据库编程
+
+
+
+example:
+
+```go
+package main
+
+import (
+    "context"
+    "database/sql"
+    "fmt"
+    "log"
+    
+    _ "github.com/denisenkom/go-mssqldb"
+)
+
+var db *sql.DB
+
+const (
+	server = "xxx.database.windows.net"
+    port = 1234
+    user = "xxx"
+    password = "xxxxxx"
+    database = "go-db"
+)
+
+func main() {
+    connStr := fmt.Sprintf("server=%s;user id=%s;password=%s;port=%d;database=%s;", server, user, password, port, database)
+    
+    db, err := sql.Open("sqlserver", connStr)
+    if err != nil {
+        log.Fatalln(err.Error())
+    }
+    
+    ctx := context.Background()
+    
+    err = db.PingContext(ctx)
+    if err != nil {
+        log.Fatalln(err.Error())
+    }
+    
+    fmt.Println("Connected")
+    
+}
+```
+
+
+
+#### 准备连接到数据库
+
+* 要想连接到`SQL`数据库，首先需要加载目标数据库驱动，驱动里面包含着与该数据库交互的逻辑
+* `sql.Open()`
+  * 数据库驱动的名称
+  * 数据源名称
+  * 得到一个指向`sql.DB`这个`struct`的指针
+* `sql.DB`是用来操作数据库的，它代表了0个或者多个底层连接的池，这些连接由`sql`包来维护，`sql`包会自动的创建和释放这些连接
+  * 它对于多个`goroutine`并发的使用是安全的
+
+##### NOTE
+
+* `Open()`函数并不会连接数据库，甚至不会验证其参数。它只是把后续连接到数据库所必需的`structs`给设置好了
+* 而真正的连接是在被需要的时候才进行懒设置的
+* `sql.DB`不需要进行关闭（当然你想关闭也是可以的）
+* 它就是用来处理数据库的，而不是实际的连接
+* 这个抽象包含了数据库连接的池，而且会对此进行维护
+* 在使用`sql.DB`的时候，可以定义它的全局变量进行使用，也可以将它传递函数/方法里
+
+#### 驱动的获取
+
+正常的做法是使用`sql.Register()`函数、数据库驱动的名称和一个实现了`driver.Driver`接口的`struct`，来注册数据库的驱动。例如：
+
+* `sql.Register("sqlserver", &dir{})`
+
+* `Sql Server`的驱动，是在这个包被引入的时候进行了自我注册
+* 当`go-mssqldb`包被引入到时候，它的`init`函数将会运行并进行自我注册（在`galang`语言里，每个包的`init`函数都会在自动的调用）
+* 在引入`go-mssqldb`包的时候，把该包的名设置为下划线`_`，这是因为不直接使用数据库驱动，只是用`database/sql`
+  * 这样如果未来升级驱动，也无需改变代码
+* `golang`语言没有提供官方的数据库驱动，所有的数据库驱动都是第三方驱动，但是它们都遵循`sql.driver`包里面定义的接口
+
+
+
+#### 安装数据库驱动
+
+* 这是安装`Microsoft SQL Server`数据库驱动的例子：
+
+  ```go
+  go get github.com/denisenkom/go-mssqldb
+  ```
+
+
+
+#### `func (*DB) PingContext`
+
+* 上述例子中的`db.PingContext()`函数是用来验证与数据库的连接是否仍然有效，如有必要则建立一个连接
+* 这个函数需要一个`Context`（上下文）类型的参数，这种类型可以携带截止时间，取消信号和其它请求范围的值，并且可以横跨`API`边界和进程
+* 上例中，创建`context`使用的是`context。Background()`函数。该函数返回一个非`nil`的空`Context`。它不会被取消，它没有值，没有截止时间
+* 它通常用在`main`函数、初始化或测试中，作为传入请求的顶级`Context`
+
+
+
+#### 查询
+
+* `sql.DB`类型上用于查询的方法有：
+
+  * `Query`
+
+    ```go
+    // example
+    func getMany(id int) (apps []app, err error) {
+        rows, err := db.Query("SELECT Id, Name, [Order] FROM APP WHERE id>@Id", sql,Named("Id", id))
+        for rows.Next() {
+            a := app{}
+            err = rows.Scan(&a.ID, &a.name, &a.order)
+            if err != nil {
+                log.Fatalln(err.Error())
+            }
+            apps = append(apps, a)
+        }
+        
+        return
+    }
+    ```
+
+    * 返回的类型是：`type Rows struct{}`
+    * `Rows`的方法：
+      * `func (rs *Rows) Close() error`
+      * `func (rs *Rows) ColumnTypes() ([]*ColumnType, error)`
+      * `func (rs *Rows) Columns() ([]strubg, error)`
+      * `func (rs *Rows) Err() error`
+      * `func (rs *Rows) Next() bool`
+      * `func (rs *Rows) NextResultSet() bool`
+      * `func (rs *Rows) Scan(dest...interface{}) error`
+
+  * `QueryRow`
+
+    ```go
+    // example
+    func getOne(id int) (a app, err error){
+        a = app{}
+        log.Println(db == nil)
+        err = db.QueryRow("SELECT Id, Name, [Order] FROM APP WHERE Id=@Id", sql.Named("Id", id)).Scan(&a.ID, &a.name, &a.order)
+        return
+    }
+    
+    // example for insert
+    func (a *app) Insert() (err error) {
+        statement := `INSERT INTO APP 
+        (Name,
+        NickName,
+        Status,
+        Level,
+        [Order],
+        Pinyin)
+        VALUS
+        (@Name,
+        'Nick',
+        @Status,
+        @Level,
+        @Order,
+        '...');
+        SELECT isNull(SCOPE_IDENTITY(), -1);`
+        stmt, err := db.Prepare(statement)
+        if err != nil {
+            log.Fatalln(err.Error())
+        }
+        defer stmt.Close()
+        err = stmt.QueryRow(
+            sql.Named("Name", a.Name)
+            sql.Named("Status", a.status)
+            sql.Named("Level", a.level)
+            sql.Named("Order", a.order)).Scan(&a.ID)
+        
+        if err != nil {
+            log.Fatalln(err.Error())
+        }
+        return 
+    }
+    ```
+
+    * 返回类型是：`type Row struct{}`
+    * `Row`的方法有：
+      * `func (r *Row) Err() error`
+      * `func (r *Row) Scan(dest...interface{}) error`
+
+  * `QueryContext`
+
+  * `QueryRowContext`
+
+
+
+#### 更新
+
+* `sql.DB`类型上用于更新（执行命令）的方法有：
+
+  * `Exec`
+
+    ```go
+    // example for update
+    func (a *app) Update() (err error) {
+        _, err = db,Exec("UPDATE APP SET Name=@Name, [Order]=@Order WHERE Id=@Id", sql.Named("Name", a.name), sql.Named("Order	", a.Order), sql.Named("Id", a.Id))
+        if err != nil {
+            log.Fatalln(err.Error())
+        }
+        return
+    }
+    ```
+
+    ```go
+    // example for delete
+    func (a *app) Delete() (err error) {
+        _, err = db.Exec("DELETE FROM APP WHERE Id=@Id", sql.Named("Id", a.Id))
+        if err != nil {
+            log.Fatalln(err.Error())
+        }
+        return 
+    }
+    ```
+
+  * `ExecContext`
+
+#### 其他
+
+* `Ping`
+* `PingContext`
+* `Prepare`
+* `PrepareContext`
+* `Transactions`
+  * `Begin`
+  * `BeginTx`
+
+
+
+
+
+### 路由
+
+#### Controller的角色
+
+* `main()`：设置类工作
+* `controller`：
+  * 静态资源
+  * 把不同的请求送到不同的`controller`进行处理
+
+#### 路由参数
+
+* 静态路由：一个路径对于一个页面
+  * `/home`
+  * `/about`
+* 带参数的路由：根据路由参数，创建出一族不同的页面
+  * `/companies/google`
+  * `/companies/Microsoft`
+
+#### 第三方路由器
+
+* `gorilla/mux`：灵活性高，功能强大，性能相对差一些
+* `httprouter`：注重性能，功能简单
+
+
+
+### `JSON`
+
+#### `Tags`
+
+example：
+
+```go
+type Company struct {
+    ID 		int		`json:"id"`
+    Name	string	`json:"name"`
+    Country	string	`json:"contry"`
+}
+```
+
+#### 类型映射
+
+* `Go bool`：`JSON boolean`
+* `Go float64`：`JSON`数值
+* `Go string`：`JSON strings`
+
+#### 对于未知结构的`JSON`
+
+* `map[string]interface{}`可以存储任意`JSON`对象
+* `[]interface{}`可以存储任意的`JSON`数组
+
+#### 读取`JSON`
+
+* 需要一个解码器：`dec:=json.NewDecoder(r Body)`
+  * 参数需实现`Reader`接口
+* 在解码器上进行解码：`dec.Decode(&query)`
+
+#### 写入`JSON`
+
+* 需要一个编码器：`enc := json.NewEncoder(w)`
+  * 参数需实现`Writer`接口
+* 编码：`enc.Encode(results)`
+
+#### `Marshal`和`Unmarshal`
+
+* `Marshal`（编码）：把`go struct`转化为`json`格式
+  * `MarshalIndet`，带缩进
+* `Unmarshal`（解码）：把`json`转化为`go struct`
+
+#### 两种方式区别
+
+* 针对`string`或`bytes`：
+  * `Marshal`=>`String`
+  * `Unmarshal`<=`String`
+* 针对`stream`：
+  * `Encode`=>`Stream`，把数据写入到`io.Writer`
+  * `Decode`<=`Stream`，从`io.Reader`读取数据
+
+
+
+
+
+### 中间件
+
+#### 创建中间件
+
+* `func ListenAndServe(addr string, handler Handler) error`
+
+  * `handler`如果是`nil`:`DefaultServeMux`
+
+* ```go
+  type Handler interface {
+      ServeHTTP(ResponseWriter, *Request)
+  }
+  ```
+
+  example：
+
+  ```go
+  type MyMiddleware struct {
+      Next http.Handler
+  }
+  func (m MyMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+      // 在 next handler 之前做一些事情
+      m.Next.ServeHTTP(w, r)
+      // 在 next hadnler 之后做一些事情
+  }
+  ```
+
+#### 中间件的用途
+
+* `Logging`
+* 安全
+* 请求超时
+* 响应压缩
+
+* `...`
+
+example：
+
+```go
+package middleware
+
+import "net/http"
+
+// AuthMiddleware ..
+type AuthMiddleware struct {
+    Next http.Handler
+}
+
+func (am *AuthMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+    if am.Next == nil {
+        am.Next = http.DefaultServeMux
+    }
+    
+    auth := r.Header.Get("Authorization")
+    if auth != "" {
+        am.Next.ServeHTTP(w, r)
+    } else {
+        w.WriteHeader(http.StatusUnauthorized)
+    }
+}
+```
+
+
+
+### 使用请求上下文
+
+#### `Request Context`
+
+* `func (*Request) Context() context.Context`

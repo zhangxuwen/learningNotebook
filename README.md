@@ -37,3 +37,8 @@ math --> NT(number theory)
 
 
 
+## About book for learning
+
+Talking about learning, this is a picture for learnging route by book, but you need to combine others to learn. 
+
+<img src = "LearningRouteBook.jpg">
