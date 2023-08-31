@@ -151,6 +151,8 @@
 
 ## MySQL环境搭建（Windows）
 
+
+
 ### 1. MySQL的卸载
 
 卸载之前，先停止`MySQL8.0`的服务。在任务管理器中可以停止其运行。
@@ -180,4 +182,302 @@
 
 <img src="img/注册表删除.png">
 
+
+
 ### 2. MySQL的下载、安装、配置
+
+#### 2.1 软件的下载
+
+1. <a href="https://www.mysql.com">官网</a>
+2. 在`DOWNLOAD`可以选择`community`下载（免费）
+3. 在安装离线版后，选择下列选项
+   1. **Custom**
+   2. <img src = "img/mysql安装.png">
+   3. 一路**Next**以及**Execute**
+   4. 配置mysql端口用户密码等
+
+#### 2.2 环境变量配置
+
+将软件安装位置的bin目录添加到环境变量-系统变量-Path里。
+
+#### 启动服务
+
+* 可以在任务管理器进行设置
+
+* 也可以在终端用脚本命令
+
+  ```bash
+  # 启动MySQL服务
+  net start MySQL服务名
+  
+  # 停止MySQL服务
+  net stop MySQL服务名
+  ```
+
+#### 登录
+
+```shell
+mysql -u root -p # (-P 可以指定端口号 -h 可以指定主机) 这样能访问一台主机下不同的mysql服务
+```
+
+然后输入密码（这样比较好）
+
+### 2.3 MySQL简单入门以及字符集设置
+
+```mysql
+# 展示数据库
+show databases;
+
+# 创建数据库
+create database databasename;
+
+# 使用某个数据库
+use databasename;
+
+# 展示表
+show tables;
+
+# 创建表
+create table tablename(...); # example(...) => (id int, log string)
+
+# 查看表信息
+show create table tablename;
+
+# 查看编码以及比较规则命令
+show variables like 'character_%';
+show variables like 'collation_%';
+```
+
+修改**MySQL**的数据目录下的**my.ini**配置文件（一般是MySQL 5.x才需要去改，MySQL 8.x 默认是utf8mb4 ）
+
+```ini
+[mysql] # 大概在63行左右，在其下添加
+...
+default-character-set=utf8	# 默认字符集
+
+[mysqld] # 大概在76行左右，在其下添加
+...
+charater-set-server=utf8
+collation-server=utf8_general_ci
+```
+
+
+
+
+
+
+
+## MySQL目录结构以及源码
+
+### 1. 目录结构
+
+| MySQL的目录结构                             | 说明                                 |
+| ------------------------------------------- | ------------------------------------ |
+| bin目录                                     | 所有MySQL的可执行文件，如：myal.exe  |
+| MySQLInstanceConfig.exe                     | 数据库的配置向导，在安装时出现的内容 |
+| data目录                                    | 系统数据库所在的目录                 |
+| my.ini文件                                  | MySQL的主要配置文件                  |
+| C:\ProgramData\MySQL\MySQL Server 8.0\data\ | 用户创建的数据库所在的目录           |
+
+### 2. 源码
+
+在进入MySQL下载界面。不选择默认的"Micosoft Windows"，而是通过下拉栏，找到"Source Code"，在下面的操作系统版本里面，选择"Windows (Architecture Independent)"，然后点击下载。接下来，把下载下来的压缩文件解压，就能得到MySQL的源代码。
+
+* sql子目录是MySQL的核心代码
+* libmysql子目录是客户端程序api
+* mysql-test子目录是测试工具
+* mysys子目录是操作系统相关函数和辅助函数
+
+
+
+
+
+
+
+## SQL
+
+SQL（Structured Query Language，结构化查询语言）是使用关系模型的数据库应用语言。
+
+
+
+### 1. SQL分类
+
+* **DDL（Data Definition Languages、数据定义语言）**，这些语句定义了不同地数据库、表、视图、索引等数据库对象，还可以用来创建、删除、修改数据库和数据表结构
+  * 主要语句关键字包括`CREATE`、`DROP`、`ALTER`等
+* **DML（Data Manipulation Language、数据操作语言）**，用于添加、删除、更新和查询数据库记录，并检查数据完整性
+  * 主要的语句关键字包括`INSERT`、`DELETE`、`SELECT`等
+  * `SELECT`是`SQL`语言的基础，最为重要
+* **DCL（Data Control Language、数据控制语言）**，用于定义数据库、表、字段、用户的访问权限和安全级别。
+  * 主要的语句关键字包括`GRANT`、`REVOKE`、`COMMIT`、`ROLLBACK`、`SAVEPOINT`等
+
+
+
+### 2. SQL语言的规则与规范
+
+#### 2.1 基本规则
+
+* SQL可以写在一行或者多行。必要时缩进
+* 每条命令以`;`或`\g`或`\G`结束
+* 关键字不能被缩写也不能分行
+* 关于标点符号
+  * 保证所有的`()`、双引号、单引号都是成对结束的
+  * 必须使用英文状态下的半角输入方式
+  * 字符串和日期时间类型的数据可以使用单引号表示
+  * 列的别名，尽量使用双引号，而且不建议省略as
+
+#### 2.2 SQL大小写规范
+
+* **MySQL**在**Windows**环境下是**大小写不敏感**的
+* **MySQL**在**Linux**环境下是**大小写敏感**的
+  * 数据库名、表名、表的别名、变量名是严格区分大小写的
+  * 关键字、函数名、列名（或字段名）、列的别名（字段的别名）是忽略大小写的
+* 推荐采用统一的书写规范：
+  * 数据库名、表名、表别名、字段名、字段别名等都小写
+  * **SQL**关键字、函数名、绑定函数名都大写
+
+#### 2.3 注释
+
+```mysql
+单行注释：# 注释文字（MySQL特有的方式）
+单行注释：-- 注释文字（--后面必须包含一个空格。）
+多行注释：/* 注释文字 */
+```
+
+#### 2.4 命名规则
+
+* 数据库、表名不得超过30个字符，变量名限制为29个
+* 必须只能包含 A-Z,a-z-9，共63个字符
+* 数据库名、表名、字段名等对象名中间不要包含空格
+* 同一个MySQL软件中，数据库不能同名，同一个库中，表不能重名同一个表中，字段不能重名
+* 必须保证你的字段没有和保留字、数据库系统或常用方法冲突。如果坚持使用，请在SOL语句中使用’(着重号)引起来
+* 保持字段名和类型的一致性，在命名字段并为其指定数据类型的时候一定保证一致性。假如数据类型在一个表里是整数，那在另一个表里可就别变成字符型了
+
+#### 2.5 数据导入指令
+
+1. 终端登录**MySQL**命令导入（使用**source**命令）
+
+   ```mysql
+   mysql> source 文件的全路径名;
+   ```
+
+2. 基于具体的图形化界面的工具可以导入数据
+
+
+
+
+
+
+
+## 基本的SELECT语句
+
+### 1. 最基本的SELECT语句：**SELECT ...**  以及 **SELECT 字段1, 字段2, ... FROM 表名**
+
+```mysql
+# example
+SELECT 1 + 1, 3 * 2;
+
+SELECT 1 + 1, 3 * 2
+FROM DUAL; # dual：伪表
+
+# *：表中的所有字段（或列）
+SELECT * FROM 表名
+```
+
+### 2. 列的别名
+
+```mysql
+# example
+# as：全称：alias（别名），可以省略
+# 列的别名可以使用一对""引起来（有的情况得加""就像"annual sal"这里）。不要使用''（MySQL虽然可以，但不符合标准）。
+
+SELECT employee_id emp_id, last_name AS lname, department_id "department_id", salary * 12 "annual sal"
+FROM employees;
+```
+
+### 3. 去除重复行
+
+**DISTINCT**
+
+```mysql
+# example
+
+# 没有去重的情况
+SELECT department_id
+FROM employees;
+
+# 去重的情况
+SELECT DISTINCT department_id
+FROM employees;
+
+
+# 错误的：只有一个去重无法做成一张表输出
+SELECT salary, DISTINCT department_id
+FROM employees;
+
+# 仅仅能够运行（看成是整体完全相同去重），没有什么实际意义
+SELECT DISTINCT department_id, salary
+FROM employees;
+```
+
+### 4. 空值参与运算
+
+* 空值：**null**
+* **null**不等同于0，''，'null'
+
+```mysql
+# example
+
+# 空值参与运算：结果一定也为空
+# 结果发现凡是commisson_pct是null的年工资都是null
+SELECT employee_id, salary "月工资", salary * (1 + commisson_pct) * 12 "年工资", commisson_pct
+FROM employees;
+
+# 实际问题的解决方案：引入IFNULLL
+# 这样如果是null就拿0来计算
+SELECT employee_id, salary "月工资", salary * (1 + IFNULL(commisson_pct, 0)) * 12 "年工资", commisson_pct
+FROM employees;
+```
+
+### 5. 着重号 	``
+
+```mysql
+# example
+
+# 修饰跟关键字重复冲突的字段（表名）
+SELECT * FROM `ORDER`;
+```
+
+### 6. 查询常数
+
+```mysql
+# example
+
+# '常数'、123都会匹配每一行
+SELECT '常数', 123, employee_id, last_name
+FROM employees
+```
+
+### 7. 显示表结构
+
+使用**DESCRIBE**或**DESC**命令，表示表结构
+
+```mysql
+# example
+
+DESCRIBE employees
+或
+DESC employees
+```
+
+```mysql
+# example
+
+mysql> desc employees # 显示了表中字段的详细信息
+```
+
+
+
+
+
+
+

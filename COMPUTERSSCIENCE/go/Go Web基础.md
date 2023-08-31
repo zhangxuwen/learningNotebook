@@ -1246,3 +1246,298 @@ func (am *AuthMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 #### `Request Context`
 
 * `func (*Request) Context() context.Context`
+  * 返回当前请求的上下文
+* `func (*Request) WithContext(ctx context.Context) context.Context`
+  * 基于`Context`进行"修改"，（实际上）创建一个新的`Context`
+
+#### `context.Context`
+
+```go
+type Context interface {
+    Deadline() (deadline time.Time, ok book)
+    Done() <- chan struct{}
+    Err() error
+    Value(key interface{}) interface{}
+}
+```
+
+* 这些方法都是用于读取，不能进行设置
+
+#### `Context API` - 可以返回新`Context`
+
+* `WithCancel()`，它有一个`CancelFunc`
+* `WithDeadline()`，带有一个时间戳（`time.Time`）
+* `WithTimeout()`，带有一个具体的时间段（`time.Duration`）
+* `WithValue()`，在里面可以添加一些值
+
+example：
+
+```go
+// timeout.go
+
+type TimeoutMiddleware struct {
+    Next http.Handler
+}
+
+func (tm TimeoutMiddleware) serveHTTP(w http.ResponseWriter, r *http.Request) {
+    if tm.Next == nil {
+        tm.Next = http.DefaultServeMux
+    }
+    
+    ctx := r.Context()
+    ctx, _ = context.WithTimeout(ctx, 3 * time.Second)
+    r.WithContext(ctx)
+    ch := make(chan struct{})
+    go func() {
+        tm.Next.SersveHTTP(w, r)
+        ch <- struct{}{}
+    }()
+    select {
+        case <- ch:
+        	return 
+        case <- ctx.Done():
+        	w.WriteHeader(http.StatusRequestTimeout)
+    }
+}
+```
+
+```go
+// main.go
+
+http.ListenAndServe("localhost:8000", &middleware.TimeoutMiddleware{
+    Next: new(middleware.AuthMiddleware)
+})
+
+
+```
+
+
+
+### HTTPS
+
+#### HTTP Listener
+
+* `http.ListenAndServe`函数
+
+* `http.ListenAndServeTLS`函数
+
+  * ```go
+    func http.ListenAndServeTLS(addr string, cerFile string, keyFile string, handler Handler)
+    ```
+
+  * `golang`本身提供的生成证书程序（但浏览器无法识别证书的认证）
+
+    * `go run xxx/Go/src/crypto/tls/generate_cert.go -h`
+    * `go run xxx/Go/src/crypto/tls/generate_cert.go -host localhost`
+
+#### HTTP/2
+
+* 请求多路复用
+
+* `Header`压缩
+
+* 默认安全
+
+  * HTTP，但很多决定不支持HTTP
+  * HTTPS
+
+* Server Push
+
+  example
+
+  ```go
+  func handleHome(w http.ResponseWriter, r *http.Request) {
+      if pusher, err := w.(http.Pusher); ok {
+          pusher.Push("/css/xxx.css", &http.PushOptions{
+              Header: http.Header{"Content-Type": []string{"text/css"}},
+          })
+      }
+  }
+  ```
+
+
+
+### 测试
+
+#### 测试Model层
+
+* user_test.go
+
+  * 测试代码所在文件的名称以`_test`结尾
+  * 对于生产编译，不会包含以`_test`结尾的文件
+  * 对于测试编译，会包含以`_test`结尾的文件
+
+* `func TestUpdatesModifiedTime(t *testing.T) {...}`
+
+  * 测试函数名应以`Test`开头（需要导出）
+  * 函数名需要表达出被验证的特性
+  * 测试函数的参数类型是`*testing.T`，它会提供测试相关的一些工具
+
+  example
+
+  ```go
+  // 被测文件
+  package model
+  
+  import "strings"
+  
+  // Company ..
+  tyep Company struct {
+      ID		int		`json:"id"`
+      Name	string	`json:"name"`
+      Country	string	`json:"country"`
+  }
+  
+  // GetCompanyType ..
+  func (c *Company) GetCompanyType() (result string) {
+      if strings.HasSuffix(c.Name, ".LTD"){
+          result = "Limited Liability Company"
+      } else {
+          result = "Others"
+      }
+      return
+  }
+  ```
+
+  ```go
+  // 测试文件
+  package model
+  
+  import "testing"
+  
+  func TestCompanyTypeCorrect(t *testing.T) {
+      c := Company {
+          ID:			12345,
+          Name:		"ABCD .LTD",
+          Country:	"China",
+      }
+      
+      companyType := c.GetCompanyType()
+      
+      if companyType != "Limited Liability Company" {
+          t.Errorf("Company's GetCompanyType Method failed to get correct company type")
+      }
+  }
+  ```
+
+#### 测试`Controller`层
+
+* 为了尽量保证单元测试的隔离性，测试不要使用例如数据库、外部`API`、文件系统等外部资源
+
+* 模拟请求和响应
+
+* 需要使用`net/http/httptest`提供的功能
+
+  * `NewRequest`函数：```func NewRequest(method, url string, body io.Reader) (*Request, error)```
+
+    * `method`：`HTTP Method`
+    * `url`：请求的`URL`
+    * `body`：请求的`Body `
+    * 返回的`*Request`可以传递给`handler`函数
+
+  * `ResponseRecorder`
+
+    ```go
+    type ResponseRecorder {
+        Code int	// 状态码 200、500...
+        HeaderMap http.Header	// 响应的header
+        Body *bytes.Buffer	// 响应的body
+        Flushed bool	//缓存是否被flush了
+    }
+    ```
+
+    * 用来捕获从`handler`返回的响应，只是做记录
+    * 可以用于测试断言
+
+    example：
+
+    ```go
+    // 被测文件部分
+    func RegisterRoutes() {
+        http.HandleFunc("/companies", handleCompany)
+    }
+    
+    func handleCompany(w http.ResponseWriter, r *http.Request) {
+        c := model.Company {
+            ID:			123,
+            Name:		"Google",
+            Country:	"USA",
+        }
+        
+        enc := json.NewEncoder(w)
+        enc.Encode(c)
+        
+    }
+    ```
+
+    ```go
+    // 测试文件
+    
+    func TestHandleCompanyCorrect(t *testing.T) {
+        r := httptest.NewRequest(http.MethodGet, "/companies", nil)
+        w := httptest.NewRecoder()
+        
+        handleCompany(w, r)
+        
+        result, _ := ioutil.ReadAll(w.Result().Body)
+        
+        c := model.Company{}
+        json.Unmarshal(result, &c)
+        
+        fi c.ID != 123 {
+            t.Errorf("Failed to handle company correctly!")
+        }
+        
+    }
+    ```
+
+
+
+### 性能分析
+
+* 内存消耗
+* CPU使用
+* 阻塞的goroutine
+* 执行追踪
+* 还有一个`Web`界面：应用的实时数据
+
+#### `import _ "net/http/pprof"`
+
+* 设置一些监听的`URL`，它们会提供各类诊断信息
+* `go tool pprof http://localhost:8000/debug/pprof/heap` // 内存
+  * 从应用获取内存`dump`：应用在使用哪些内存，它们会去哪
+* `go tool pprof http://localhost:8000/debug/pprof/profile` // CPU
+  * CPU的快照，可以看到谁在用CPU
+* `go tool pprof http://localhost:8000/debug/pprof/block` // goroutine
+  * 看到阻塞的`goroutine`
+* `go tool pprof http://localhost:8000/debug/pprof/tarce?seconds=5` // trace
+  * 监控这段时间内，什么在执行，什么在调用什么...
+
+
+
+### 部署
+
+```shell
+go build .
+nohup ./it &
+或者通过守护进程
+sudo vim /etc/systemd/system/go-web.service # (go-web是属于自己起的名)
+```
+
+```shel
+# go-web.service
+[Unit]
+Description=GO WEB App running on Ubuntu
+
+[Service]
+ExecStart=/home/solenovex/it/it	# 启动文件的命令
+Restart=always	# 设置挂了会自动重启
+RestartSec=10	# 重启服务间隔为10秒
+killSignal=SIGINT
+SyslogIdentifier=go-web-example
+User=solenovex	# 执行用户
+
+[Install]
+WantedBy=multi-user.target
+```
+
