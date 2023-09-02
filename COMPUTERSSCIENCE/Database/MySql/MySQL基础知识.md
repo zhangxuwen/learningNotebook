@@ -200,7 +200,7 @@
 
 将软件安装位置的bin目录添加到环境变量-系统变量-Path里。
 
-#### 启动服务
+#### 2.3 启动服务
 
 * 可以在任务管理器进行设置
 
@@ -214,7 +214,7 @@
   net stop MySQL服务名
   ```
 
-#### 登录
+#### 2.4 登录
 
 ```shell
 mysql -u root -p # (-P 可以指定端口号 -h 可以指定主机) 这样能访问一台主机下不同的mysql服务
@@ -222,7 +222,7 @@ mysql -u root -p # (-P 可以指定端口号 -h 可以指定主机) 这样能访
 
 然后输入密码（这样比较好）
 
-### 2.3 MySQL简单入门以及字符集设置
+### 3. MySQL简单入门以及字符集设置
 
 ```mysql
 # 展示数据库
@@ -269,6 +269,8 @@ collation-server=utf8_general_ci
 
 ## MySQL目录结构以及源码
 
+
+
 ### 1. 目录结构
 
 | MySQL的目录结构                             | 说明                                 |
@@ -278,6 +280,8 @@ collation-server=utf8_general_ci
 | data目录                                    | 系统数据库所在的目录                 |
 | my.ini文件                                  | MySQL的主要配置文件                  |
 | C:\ProgramData\MySQL\MySQL Server 8.0\data\ | 用户创建的数据库所在的目录           |
+
+
 
 ### 2. 源码
 
@@ -370,6 +374,8 @@ SQL（Structured Query Language，结构化查询语言）是使用关系模型�
 
 ## 基本的SELECT语句
 
+
+
 ### 1. 最基本的SELECT语句：**SELECT ...**  以及 **SELECT 字段1, 字段2, ... FROM 表名**
 
 ```mysql
@@ -383,6 +389,8 @@ FROM DUAL; # dual：伪表
 SELECT * FROM 表名
 ```
 
+
+
 ### 2. 列的别名
 
 ```mysql
@@ -393,6 +401,8 @@ SELECT * FROM 表名
 SELECT employee_id emp_id, last_name AS lname, department_id "department_id", salary * 12 "annual sal"
 FROM employees;
 ```
+
+
 
 ### 3. 去除重复行
 
@@ -419,6 +429,8 @@ SELECT DISTINCT department_id, salary
 FROM employees;
 ```
 
+
+
 ### 4. 空值参与运算
 
 * 空值：**null**
@@ -438,6 +450,8 @@ SELECT employee_id, salary "月工资", salary * (1 + IFNULL(commisson_pct, 0)) 
 FROM employees;
 ```
 
+
+
 ### 5. 着重号 	``
 
 ```mysql
@@ -446,6 +460,8 @@ FROM employees;
 # 修饰跟关键字重复冲突的字段（表名）
 SELECT * FROM `ORDER`;
 ```
+
+
 
 ### 6. 查询常数
 
@@ -456,6 +472,8 @@ SELECT * FROM `ORDER`;
 SELECT '常数', 123, employee_id, last_name
 FROM employees
 ```
+
+
 
 ### 7. 显示表结构
 
@@ -477,7 +495,541 @@ mysql> desc employees # 显示了表中字段的详细信息
 
 
 
+### 8. 过滤数据
+
+**WHERE**
+
+```mysql
+# example
+
+# 查询90号部门的员工信息
+SELECT *
+FROM employees
+# 过滤条件，声明在FROM结构的后面
+WHERE dapartment_id = 90;
+```
 
 
 
+
+
+
+
+## 运算符
+
+
+
+### 1. 算术运算符
+
+算术运算符主要用于数学运算，其可以连接运算符前后的两个数值或表达式，对数值或表达式进行加（`+`）、减（`-`）、乘（`*`）、除（`/`）和取模（`%`）运算
+
+```mysql
+# example
+
+SELECT 100, 100 + 0, 100 -50, 100 - 35.5
+FROM DUAL;
+
+# 结果
+/*
+|----------|
+|100 + '1' |
+|----------|
+|       101|
+|----------|
+*/
+# 在SQL中， +没有连接的作用，就表示加法运算。此时，会将字符串转换为数值（隐式转换）
+SELECT 100 + '1' # 在Java语言中，结果是：1001。
+FROM DUAL;
+
+SELECT 100 + 'a' # 此时将'a'看做0处理
+FROM DUAL;
+
+SELECT 100 + NULL # NULL值参与运算结果为空
+FROM DUAL;
+
+
+
+# 取模运算：	%(mod)
+
+SELECT 12 % 3, 12 % 5, 12 MOD -5, -12 % -5
+FROM DUAL;
+
+# 练习：查询员工id为偶数的员工信息
+SELECT employee_id, last_name, salary
+FROM employees
+WHERE employee_id % 2 = 0;
+```
+
+
+
+### 2.比较运算符
+
+比较运算符用来对表达式左边的操作数和右边的操作数进行比较，比较的结果为真则返回1，比较的结果为假则返回0，其他情况则返回NULL。
+
+比较运算符经常用来作为SELECT查询语句的条件来使用，返回符合条件的结果记录
+
+| 运算符     | 名称           | 作用                                                         | 示例                              |
+| ---------- | -------------- | ------------------------------------------------------------ | --------------------------------- |
+| **=**      | 等于运算符     | 判断两个值、字符串或表达式是否相等                           | SELECT C FROM TABLE WHERE A = B   |
+| **<=>**    | 安全等于运算符 | 安全地判断两个值、字符串或是否相等                           | SELECT C FROM TABLE WHERE A <=> B |
+| **<>(!=)** | 不等于运算符   | 判断两个值、字符串或表达式是否不相等                         | SELECT C FROM TABLE WHERER A <> B |
+| **<**      | 小于等于运算符 | 判断前面的值、字符串或表达式是否小于小于后面的值、字符串或表达式 | SELECT C FROM TABLE WHERE A < B   |
+| **<=**     | 小于等于运算符 | 判断前面的值、字符串或表达式是否小于等于后面的值、字符串或表达式 | SELECT C FROM TABLE WHERE A <= B  |
+| **>**      | 大于运算符     | 判断前面的值、字符串或表达式是否大于后面的值、字符串或表达式 | SELECT C FROM TABLE WHERE A > B   |
+| >=         | 大于等于       | 判断前面的值、字符串或表达式是否大于等于后面的值、字符串或表达式 | SELECT C FROM TABLE WHERE A >= B  |
+
+此外，还有非符号类型的运算符
+
+| 运算符                | 名称             | 作用                                 | 示例                                        |
+| --------------------- | ---------------- | ------------------------------------ | ------------------------------------------- |
+| **IS NULL**           | 为空运算符       | 判断值、字符串或表达式是否为空       | SELECT B FROM TABLE WHERE A IS NULL         |
+| **IS NOTNULL**        | 不为空预算符     | 判断值、字符串或表达式是否不为空     | SELECT B FROM TABLE WHERE A IS NOT NULL     |
+| **LEAST**             | 最小值运算符     | 在多个值中返回最小值                 | SELECT D FROM TABLE WHERE C LEAST(A, B)     |
+| **GREATEST**          | 最大值运算符     | 在多个值中返回最大值                 | SELECT D FROM TABLE WHERE C GREATEST(A, B)  |
+| **BETWEEN**...**AND** | 两者之间的运算符 | 判断一个值是否在两个值之间           | SELECT D FROM TABLE WHERE C BETWEEN A AND B |
+| **ISNULL**            | 为空运算符       | 判断一个值、字符串或表达式是否为空   | SELECT B FROM TABLE WHERE A ISNULL          |
+| **IN**                | 属于运算符       | 判断一个值是否为列表中的任意一个值   | SELECT D FROM TABLE WHERE C IN(A, B)        |
+| **NOT IN**            | 不属于运算符     | 判断一个值是否不是列表中的任意一个值 | SELECT D FROM TABLE WHERE C NOT IN(A, B)    |
+| **LIKE**              | 模糊匹配运算符   | 判断一个值是否符合模糊匹配规则       | SELECT C FROM TABLE WHERE A LIKE B          |
+| **REGEXP**            | 正则表达式运算符 | 判断一个值是否符合正则表达式的规则   | SELECT C FROM TABLE WHERE A REGEXP B        |
+| **RLIEK**             | 正则表达式运算符 | 判断一个值是否符合正则表达式的规则   | SELECT C FROM TABLE WHERE A  RLIKE B        |
+
+```mysql
+# example
+
+# 两边都是字符串的话，则按照ANSI的比较规则进行比较
+SELECT 	'a' = 'a', 'ab' = 'ab'
+FROM DUAL;
+
+# 只有有null参与判断，结果就为null
+SELECT 1 = NULL
+FROM DUAL;
+
+# <=> 安全等于，跟=唯一区别是可以对null进行判断
+SELECT 1 <=> NULL, NULL <=> NULL # 0, 1 在两个操作数均为NULL时，则返回值为1，而不为NULL；当一个操作数为NULL时，其返回值为0
+FROM DUAL;
+
+
+
+# IS NULL / IS NOT NULL / ISNULL
+# 练习：查询表中commission_pct为null的数据有哪些
+SELECT  last_name, salary, commisson_pct
+FROM employees
+WHERE commission_pct IS NULL;
+# 或
+SELECT  last_name, salary, commisson_pct
+FROM employees
+WHERE ISNULL(commission_pct);
+
+# 练习：查询表中commission_pct不为null的数据有哪些
+SELECT  last_name, salary, commisson_pct
+FROM employees
+WHERE commission_pct IS NOT NULL;
+# 或
+SELECT  last_name, salary, commisson_pct
+FROM employees
+WHERE NOT commission_pct <=> NULL;
+
+
+
+# LEAST() / GREATEST()
+
+SELECT LEAST('g'. 'b', 't', 'm'), GREATEST('g'. 'b', 't', 'm')
+FROM DUAL; # 'b', 't'
+
+
+# BETWEEN 条件下界 AND 条件上界
+
+# 查询工资在6000到8000的员工信息
+SELECT employee_id, last_name, salary
+FROM employees
+WHERE salary BETWEEN 6000 AND 8000;
+
+# 交换6000和8000之后，查询不到数据
+SELECT employee_id, last_name, salary
+FROM employees
+WHERE salary BETWEEN 8000 AND 6000;
+
+# 查询工资不在6000到8000的员工信息
+SELECT employee_id, last_name, salary
+FROM employees
+WHERE salary NOT BETWEEN 6000 AND 8000;
+
+
+
+# IN (set) / NOT IN (set)
+
+# 练习：查询部门为10，20，30部门的员工信息
+SELECT last_name, salary, department_id
+FROM employees
+# 这样写麻烦
+# WHERE department_id = 10 or WHERE department_id = 20 or WHERE department_id = 30
+WHERE department_id IN (10, 20, 30)
+
+# 查询工资不是6000，7000，8000的员工信息
+SELECT employee_id, last_name, salary
+FROM employees
+WHERE salary NOT IN (6000, 7000, 8000);
+
+
+
+# LIKE：模糊查询
+
+# % ：代表不确定个数的字符（0个，1个，或多个）
+# 练习：查询last_name中包含字符'a'的员工信息
+SELECT last_name
+FROM employees
+WHERE last_name LIKE '%a%';
+
+# 练习：查询last_name以字符'a'开头的员工信息
+SELECT last_name
+FROM employees
+WHERE last_name LIKE 'a%';
+
+# 练习：查询last_name中包含字符'a'并且包含字符'e'的员工信息
+SELECT last_name
+FROM employees
+WHERE last_name LIKE '%a%e%' OR last_name LIKE '%e%a%';
+
+
+# _ ：代表一个不确定的字符
+# 练习：查询第2个字符是'a'的员工信息
+SELECT last_name
+FROM employees
+WHERE last_name LIKE '_a%';
+
+# 练习：查询第2个字符是'_'并且第3个字符是'a'的员工信息
+# 需要使用转义字符：\
+SELECT last_name
+FROM employees
+WHERE last_name LIKE '_\_a%';
+# WHERE last_name LIKE '_$_a%' ESCAPE '$'; 这样能用$表示转义字符（\）
+
+
+# REGEXP \ RLIKE：正则表达式
+
+# 练习
+SELECT 'dkjfalkdjfk' REGEXP '^dkj', 'kdjfkkdjfal' REGEXP 'l$', 'skdjfla' REGEXP 'dj'
+FROM DUAL; # 1 1 1
+
+SELECT 'kdjk' REGEXP 'k.j', 'dfkdjka' REGEXP '[da]'
+FROM DUAL; # 1 1
+```
+
+
+
+### 3.逻辑运算符
+
+逻辑运算符主要用来判断表达式的真假，在**MySQL**中，逻辑运算符的返回结果为1，0或NULL。
+
+**MySQL**支持四种逻辑运算符如下
+
+| 运算符     | 作用     | 示例                           |
+| ---------- | -------- | ------------------------------ |
+| NOT 或 ！  | 逻辑非   | SELECT NOT A                   |
+| AND 或 &&  | 逻辑与   | SELECT A AND B(SELECT A && B)  |
+| OR 或 \|\| | 逻辑或   | SELECT A OR B(SELECT A \|\| B) |
+| XOR        | 逻辑异或 | SELECT A XOR B                 |
+
+
+
+### 4. 位预算符
+
+<img src = "img/位预算符.png">
+
+
+
+### 5. 运算符的优先级
+
+<img src = "img/运算符优先级.png">
+
+
+
+
+
+
+
+## 排序与分页
+
+```mysql
+# example
+
+# 排序
+
+# 如果没有使用排序操作，默认情况下查询返回的数据是按照添加数据的顺序显示的
+SELECT *
+FROM employees;
+
+
+# 使用 ORDER BY 对查询到的数据进行排序操作（默认是升序）
+# 升序：ASC (ascend)
+# 降序：DESC	(descend)
+
+# 练习：按照salary从高到低的顺序显示员工信息
+SELECT employee_id, last_name, salary
+FROM employees
+ORDER BY salary DESC;
+
+# 可以使用列的别名，进行排序
+SELECT employee_id, last_name, salary * 12 annual_sal
+FROM employees
+ORDER BY annual_sal DESC;
+# 别名只能在 ORDER BY 中使用，不能在 WHERE 中使用
+# 错误的，会报错
+SELECT employee_id, last_name, salary * 12 annual_sal
+FROM employees
+WHERE annual_sal > 816000;
+
+# 二级排序
+
+# 练习：显示员工信息，按照department_id的降序排列，salary的升序排列
+SELECT employee_id, last_name, salary
+FROM employees
+ORDER BY department_id DESC, salary ASC;
+```
+
+```mysql
+# example
+
+# 分页
+
+# mysql使用LIMIT实现数据的分页显示
+
+# 需求：每页显示20条记录，此时显示第1页
+SELECT employee_id, last_name
+FROM employees
+LIMIT 0, 20;
+
+# 需求：每页显示20条记录，此时显示第2页
+SELECT employee_id, last_name
+FROM employees
+LIMIT 20, 20;
+
+
+
+# WHERE ... ORDER BY ... LIMIT 声明顺序
+
+# LIMIT 的格式：严格来说 LIMIT 位置偏移量，条目数
+# 结构"LIMIT 0, 条目数"等价于"LIMIT 条目数"
+SELECT employee_id, last_name, salary
+FROM employees
+WHERE salary > 6000
+ORDER BY salary DESC
+# LIMIT 0, 10;
+LIMIT 10;
+
+
+# MySQL8.0新特性：LIMIT ... OFFSET ...
+SELECT employee_id, last_name
+FROM employees
+# LIMIT 31, 2;
+LIMIT 2 OFFSET 31;
+```
+
+
+
+
+
+
+
+## 多表查询
+
+
+
+### 1. 笛卡尔积（或交叉连接）的理解
+
+笛卡尔积是一个数学运算。假设有两个集合`X`和`Y`，那么`X`和`Y`的笛卡尔积就是`X`和`Y`的所有可能组合。
+
+```mysql
+# example
+
+# 笛卡尔积错误
+SELECT employee, department_name
+FROM employees, departments;
+
+# 多表查询的正确方式：需要有连接条件
+SELECT employee, department_name
+FROM employees, departments
+# 两个表的连接条件
+WHERE employees.`department_id` = departmets.department_id;
+
+# 如果查询语句中出现了多个表中都存在的字段，则必须指明此字段所在的表
+SELECT employee, department_name，employees.department_id
+FROM employees, departments
+WHERE employees.`department_id` = departmets.department_id;
+
+# 建议：从sql优化的角度，建议多表查询时，每个字段前都指明其所在的表
+
+# 可以给表起别名，在SELECT和WHRER中使用表的别名
+SELECT emp.employee, dept.department_name，emp.department_id
+FROM employees emp, departments dept
+WHERE emp.`department_id` = dept.department_id;
+# 如果给表请了别名，一旦在SELECT或WHERE中使用表名的话，则必须使用表的别名，而不能使用表的别名
+# 如下操作是错误的，会报错
+SELECT emp.employee, dept.department_name，emp.department_id
+FROM employees emp, departments dept
+WHERE emp.`department_id` = departments.department_id;
+
+
+# 练习：查询员工的employee_id, last_name, department_name, city
+SELECT employee_id, last_name, department_name, city
+FROM employees e, departments d, locations l
+WHERE e.`department_id` = d.`department_id`
+AND d.`location_id` = l.`location_id`;
+```
+
+​	
+
+### 2. 多表查询的分类
+
+角度一：等值连接	vs	非等值连接
+
+角度二：自连接		vs	非自连接
+
+角度三·：内连接		vs	外连接
+
+```mysql
+# example
+
+# 等值连接	vs	非等值连接
+
+# 例子非等值连接
+SELECT e.last_name, e.salary, j.grade_level
+FROM employees e, job_grades j
+WHERE e.`salary` BETWEEN j.`lowest_sal` AND j.`highest_sal`;
+
+
+# 自连接	vs	非自连接
+
+# 自连接例子
+# 练习：查询员工id，员工名字及其管理者的id和姓名
+SELECT emp.employee_id, emp.last_name, emp.employee_id, mgr.last_name
+FROM employees emp, employees mgr
+WHERE emp.`manager_id` = mgr.`employee_id`
+
+
+# 内连接	vs	外连接
+
+# 内连接：合并具有同一列的两个以上的表的行，结果集中不包含一个表与另一个表不匹配的行
+
+
+# 外连接：合并具有同一列的两个以上的表的行，结果集中除了包含一个表与另一个表匹配的行之外，还查询到左表或右表中不匹配的行
+# 外连接的分类：左外连接、右外连接、满外连接
+# 左外连接：两个表在连接过程中除了返回满足连接条件的行以外还返回左表不满足条件的行
+#右外连接：两个表在连接过程中除了返回满足连接条件的行以外还返回右表不满足条件的行
+# -----------------
+# 练习：查询所有的员工的last_name, department_name信息
+
+# SQL92语法实现外连接：使用 + --- MySQL不支持SQL92语法实现的外连接
+/*
+失败的，会报错的左外连接
+SELECT employee_id, department_name
+FROM employees e, department d
+WHERE e.`department_id` = d.department_id (+);
+*/
+
+# SQL99语法中使用 JOIN ... ON 的方式实现多表的查询，这种方式也能外连接的问题。MySQL支持这种方式
+# 内连接
+SELECT employee_id, department_name
+FROM employees e JOIN department d
+ON e.`department_id` = d.`department_id`;
+# 左外连接(OUTER可以省略掉)
+SELECT employee_id, department_name
+FROM employees e LEFT OUTER JOIN department d
+ON e.`department_id` = d.`department_id`;
+
+# 满外连接（全外连接）：MySQL 不支持 FULL OUTER JOIN
+SELECT employee_id, department_name
+FROM employees e FULL OUTER JOIN department d
+ON e.`department_id` = d.`department_id`;
+# -----------------
+```
+
+SQL99语法JOIN
+
+<img src = "img/sqlJOIN.png">
+
+### 3. UNION的使用
+
+<img src = "img/union1.png">
+
+<img src = "img/union2.png">
+
+### 4. SQL99语法的新特性1：自然连接
+
+SQL99在SQL92的基础上提供了一些特殊语法，比如`NATURAL JOIN`用来表示自然连接。它会自动查询两张表中**所有相同的字段**，然后进行**等值连接**。
+
+```mysql
+# example
+
+SELECT employee_id, department_name
+FROM employees e JOIN department d
+ON e.`department_id` = d.`department_id`
+AND e.`manger_id` = d.`manger_id`;
+#等价于自然连接
+SELECT employee_id, department_name
+FROM employees e NATURAL JOIN department d;
+```
+
+### 5. SQL99语法的新特性2：USING
+
+```mysql
+# example
+
+SELECT employee_id, department_name
+FROM employees e JOIN department d
+ON e.`department_id` = d.`department_id`;
+#等价于USING 
+SELECT employee_id, department_name
+FROM employees e JOIN department d
+USING (department_id);
+```
+
+
+
+
+
+
+
+## 函数
+
+
+
+### MySQL的内置函数以及分类
+
+<img src="img/mysql函数介绍.png">
+
+
+
+### 1. 数值函数
+
+
+
+#### 1.1 基本函数
+
+<img src = "img/基本函数.png">
+
+
+
+#### 1.2 角度与弧度互换函数
+
+<img src = "img/角度与弧度互换函数.png">
+
+
+
+#### 1.3 三角函数
+
+<img src = "img/三角函数.png">
+
+
+
+#### 1.4 指数与对数
+
+<img src = "img/指数与对数.png">
+
+
+
+#### 1.5 进制间的转换
+
+<img src = "img/进制间转换.png">
 
