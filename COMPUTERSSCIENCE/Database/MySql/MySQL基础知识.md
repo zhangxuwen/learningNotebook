@@ -1,4 +1,4 @@
-# MySQL基础知识
+# 	MySQL基础知识
 
 
 
@@ -971,7 +971,7 @@ SELECT employee_id, department_name
 FROM employees e NATURAL JOIN department d;
 ```
 
-### 5. SQL99语法的新特性2：USING
+### 5. SQL99语法的新特性2：
 
 ```mysql
 # example
@@ -1032,4 +1032,981 @@ USING (department_id);
 #### 1.5 进制间的转换
 
 <img src = "img/进制间转换.png">
+
+
+
+
+
+### 2. 字符串函数
+
+一般用到的：
+
+<img src = "img/字符串函数1.png">
+
+
+
+<img src = "img/字符串函数2.png">
+
+<img src = "img/字符串函数3.png">
+
+
+
+### 3. 日期和时间类型函数
+
+
+
+#### 3.1 获取日期、时间
+
+<img src = "img/获取时间、日期.png">
+
+
+
+#### 3.2 日期与时间戳的转换
+
+<img src = "img/日期与时间戳的转换.png">
+
+
+
+#### 3.3 获取月份、星期、星期数、天数等函数
+
+<img src = "img/获取月份、星期、星期数、天数等函数.png">
+
+
+
+#### 3.4 日期的操作函数
+
+<img src = "img/日期的操作函数.png">
+
+
+
+#### 3.5 时间和秒钟转换的函数
+
+<img src = "img/时间和秒钟转换的函数.png">
+
+
+
+#### 3.6 计算日期和时间的函数
+
+<img src = "img/计算日期和时间的函数1.png">
+
+<img src = "img/计算日期和时间的函数2.png">
+
+
+
+#### 3.7 日期的格式化与解析
+
+<img src = "img/日期的格式化与解析.png">
+
+
+
+
+
+### 4. 流程控制函数
+
+流程处理函数根据不同的条件，执行不同的处理流程，可以在**SQL**语句中实现不同的条件选择。**MySQL**中的流程处理函数主要包括`IF()`、`IFNULL()`和`CASE()`函数
+
+<img src = "img/流程控制函数.png">
+
+```mysql
+# example
+
+# 练习1查询部门号为 10,20，30 的员工信息若部门号为 10，则打印其工资的 1.1 倍，20 号部门，则打印其工资的 1.2 倍，30 号部门.打印其工资的 1.3 倍数其他部门,打印其工资的 1.4 倍数
+SELECT employee_id, last_name, deapartment_id, salary, CASE department_id WHEN 10 THEN salary * 1.1
+																		  WHEN 20 THEN salary * 1.2
+																		  WHEN 20 THEN salary * 1.2
+																		  ELSE salary * 1.4 END "details"
+FROM employees;
+
+```
+
+
+
+### 5. 加密与解密函数
+
+加密与解密函数主要用于对数据库中的数据进行加密和解密处理，以防数据被他人窃取。这些函数在保证数据库安全时非常有用。
+
+<img src = "img/加密与解密函数.png">
+
+```mysql
+# example
+
+# ENCODE(), DECODE(), PASSWORD()在MySQL8.0中弃用
+SELECT MD5('MySQL'), SHA('MySQL')
+FROM DUAL;
+```
+
+
+
+### 6. MySQL信息函数
+
+MySQL中内置了一些可以查询MySQL信息的函数，这些函数主要用于帮助数据库开发或运维人员更好地对数据库进行维护工作
+
+<img src = "img/MySQL信息函数.png">
+
+
+
+### 7. 其他函数
+
+<img src = "img/其他函数.png">
+
+
+
+
+
+
+
+## 聚合函数
+
+它是对一组函数进行汇总的函数，输入的是一组数据的集合，输出的是单个值。
+
+
+
+### 1. 聚合函数介绍
+
+* 聚合函数作用于一组数据，并对一组数据返回一个值
+
+* （常用）聚合函数类型
+
+  * AVG()
+
+    ```mysql
+    # example
+    
+    # 需求：查询公司中平均奖金率
+    # 错误的！
+    SELECT AVG(commission_pct)
+    FROM employees;
+    
+    # 正确的：
+    SELECT SUM(commission_pct) / COUNT(IFNULL(commission_pct, 0))
+    # AVG(IFNULL(commission_pct, 0))
+    FROM employees;
+    ```
+
+    
+
+  * SUM()
+
+  * MAX()
+
+  * MIN()
+
+  * COUNT()
+
+    ```mysql
+    # example
+    
+    # 如果计算表中有多少条记录，如何实现？
+    # 方式一：COUNT(*)
+    # 方式二：COUNT(1)
+    # 方式三：COUNT(具体字段)：不一定对！
+    
+    # 注意：计算指定字段出现的个数时，是不计算NULL值的
+    SELECT COUNT(commission_pct)
+    FROM employees;
+    
+    # 如何需要统计表中的记录数，使用COUNT(*)、COUNT(1)、COUNT(具体字段)哪个效率更高呢？
+    # 如果使用的是 MyISAM 存储引擎，则三者效率相同同时O(1)
+    # 如果使用的时 InnoDB 存储引擎，则三者效率：COUNT(*) =  COUNT(1) > COUNT(字段)
+    ```
+    
+
+
+
+### 2. GROUP BY
+
+```mysql
+# example
+
+# 需求：查询各个部门的平均工资、最高工资
+SELECT department_id, AVG(salary)
+FROM employees
+GROUP BY department_id;
+
+# 需求：查询各个job_id的平均工资
+SELECT job_id, AVG(salary)
+FROM employees
+GROUP BY job_id;
+
+# 需求：查询各个department++id, job_id的平均工资
+SELECT AVG(salary)
+FROM employees
+GROUP BY department_id, job_id;
+# 或
+SELECT AVG(salary)
+FROM employees
+GROUP BY job_id, department_id;
+
+# 结论一：SELECT中出现的非组函数的字段必须声明在GROUP BY中。
+# 反之，GROUP BY中声明的字段可以不出现在SELECT中
+# 结论二：GROUP BY 声明在FROM后面、WHERE后面、ORDER BY前面、LIMIT前面
+
+```
+
+<img src = "img/WITH ROLLUP.png">
+
+
+
+### 3.HAVING
+
+用来过滤数据
+
+```mysql
+# example
+
+# 练习：查询各个部门中最高工资比10000高的部门信息
+# 要求1：如果过滤条件中使用了聚合函数，则必须使用HAVING来替换WHERE。否则，报错
+# 要求2：HAVING 必须声明在 GROUP BY 的后面
+SELECT dapartment_id, MAX(salary)
+FROM employees
+GROUP BY department_id
+HAVING MAX(salary);
+
+# 要求3：开发中，我们使用HAVING的前提时SQL中使用了GROUP BY
+
+# 练习：查询部门id为10，20，30，40这4个部门中最高工资比10000高的部门信息
+# 方式1：推荐，执行效率高于方式2
+SELECT department_id, MAX(salary)
+FROM employees
+WHERE department_id IN (10, 20, 30, 40)
+GROUP BY department_id
+HAVING MAX(salary) > 10000;
+# 方式2：
+SELECT department_id, MAX(salary)
+FROM employees
+GROUP BY department_id
+HAVING MAX(salary) > 10000 AND department_id IN (10, 20, 30, 40);
+
+# 结论：当过滤条件中有聚合函数时，则此过滤条件必须声明在HAVING中
+# 	   当过滤条件没有聚合函数时，则此过滤条件声明在WHERE中或HAVING中都可以。但是建议大家声明在WHERE中
+
+
+```
+
+#### 3.1 WHERE 和 HAVING的对比
+
+<img src = "img/WHERE和HAVING的对比.png">
+
+
+
+### 4. SQL 底层执行原理
+
+
+
+#### 4.1 SELECT 语句的完整结构
+
+```mysql
+# sql92语法：
+SELECT ...,...,...(存在聚合函数)
+FROM ...,...,...
+WHERE 多表的连接条件 AND 不包含聚合函数的过滤条件
+GROUP BY ...,...
+HAVING 包含聚合函数的过滤条件
+ORDER BY ...,...(ASC / DESC)
+
+# sql99语法：
+SELECT ...,...,...(存在聚合函数)
+FROM ...(LEFT / RIGHT) JOIN ... ON 多表的连接条件
+WHERE 不包含聚合函数的过滤条件
+GROUP BY ...,...
+HAVING 包含聚合函数的过滤条件
+ORDER BY ...,...(ASC / DESC)
+LIMIT ...,...
+```
+
+
+
+#### 4.2 SQL语句的执行过程：
+
+在SELECT语句执行这些步骤的时候，每个步骤都会产生一个`虚拟表`，然后将这个虚拟表转入下一个步骤中作为输入
+
+```mysql
+FROM ...,... -> ON -> (LEFT / RIGHT JOIN) -> WHERE -> GROUP BY -> HAVING -> SELECT -> DISTINCT -> ORDER BY -> LIMIT
+```
+
+
+
+
+
+
+
+
+
+## 子查询
+
+子查询指一个查询语句嵌套在另一个查询语句内部的查询。
+
+ SQL中子查询的使用大大增强了SELECT查询的能力，因为很多时候查询需要从结果集中获取数据、或者需要从同一个表中先计算得出一个数据结果，然后与这个数据结果（可能是某个标量，也可能是某个集合）进行比较。
+
+```mysql
+# example
+
+# 需求：谁的工资比Abel的高？
+# 方式一：
+SELECT salary
+FROM employees
+WHERE last_name = 'Abel';
+
+SELECT last_name, salary
+FROM employees
+WHERE salary > 11000;
+
+# 方式二：自连接
+SELECT e2.last_name, e2.salary
+FROM employees e1, employees e2
+WHERE e2.`salary` > e1.`salary` # 多表的连接条件
+AND e1.last_name = 'Abel';
+
+# 方式三：子查询
+SELECT last_name, salary
+FROM employees
+WHERE salary > (
+				SELECT salary
+    			FROM employees
+    			WHERE last_name = 'Abel'
+			   	);
+
+# 称谓的规范：外查询（或主查询）、内查询（或子查询）
+/*
+- 子查询（内查询）在主查询之前一次执行完成。
+- 子查询的结果被主查询（外查询）使用。
+- **注意事项**
+	- 子查询要包含在括号内
+	- 将子查询放在比较条件的右侧
+	- 单行操作符对应单行子查询，多行操作符对应多行子查询
+*/
+
+/*
+子查询的分类
+角度一： 从内查询返回的结果的条目数
+		单行子查询	vs	多行子查询
+角度二： 内查询是否被执行多次
+		相关子查询	vs	不相关子查询
+比如：相关子查询地需求：查询大于其本部门平均工资地员工信息
+*/
+
+```
+
+
+
+### 1. 单行子查询
+
+
+
+#### 1.1 单行比较操作符
+
+<img src = "img/单行比较操作符.png">
+
+
+
+#### 1.2  子查询的编写技巧（或步骤）：1.  从里往外写	2.  从外往里写
+
+
+
+#### 1.3 HAVING中的子查询
+
+* 首先执行子查询
+* 向主查询中的HAVING子句返回结果
+
+```mysql
+# example
+
+# 题目：查询最低工资大于50号部门最低工资的部门id和其最低工资
+SELECT department_id, MIN(salary)
+FROM employees
+GROUP BY department_id
+HAVING MIN(salary) > (
+						SELECT MIN(salary)
+						FROM employees
+						WHERE depart_id = 110
+					 );
+					 
+
+# 题目：显示员工的employee_id，last_name和location。
+# 其中若员工department_id与location_id为1800的department_id相同，
+# 则location为`Canada`，其余则为`USA`。
+SELECT employee_id, last_name, CASE department_id WHEN (SELECT department_id FROM departments WHERE location_id = 1800) THEN 'Canada' ELSE 'USA' END 'location'
+FROM employees
+
+```
+
+
+
+### 2. 多行子查询
+
+* 也称集合比较子查询
+* 内查询返回多行
+* 使用多行比较操作符
+
+#### 2.1 多行比较操作符
+
+<img src = "img/多行比较操作符.png">
+
+```mysql
+# example
+
+# 例子
+# IN:
+SELECT employees_id, last_name
+FROM employees
+WHERE salary IN 
+				(
+                    SELECT MIN(salary)
+                    FROM employees
+                    GROUP BY department_id
+				);
+
+# ANY / ALL:
+# 题目：返回其它job_id中比job_id为`IT_PROG`部门任一工资低的员工的员工号、
+# 姓名、job_id 以及 salary
+SELECT employee_id, last_name, job_id, salary
+FROM employees
+WHERE job_id <> 'IT_PROG'
+AND salary < ANY (
+    SELECT salary
+    FROM employees
+    WHERE job_id = 'IT_PROG'
+);
+# 题目：返回其它job_id中比job_id为`IT_PROG`部门所有工资都低的员工的员工号、
+# 姓名、job_id 以及 salary
+SELECT employee_id, last_name, job_id, salary
+FROM employees
+WHERE job_id <> 'IT_PROG'
+AND salary < ALL (
+	SELECT salary
+    FROM employees
+    WHERE job_id = 'IT_PROG'
+);
+
+# 题目：查询平均工资最低的部门id
+# MySQL中聚合函数是不能嵌套使用的
+# 方式一：
+SELECT department_id
+FROM employees
+GROUP BY department_id
+HAVING AVG(salary) = (
+	SELECT MIN(avg_sal)
+	FROM (
+	    SELECT AVG(salary) avg_sal
+	    FROM employees
+	    GROUP BY department_id
+	) t_dept_avg_sal
+);
+# 方式二：
+SELECT department_id
+FROM employees
+GROUP BY department_id
+HAVING AVG(salary) <= ALL (
+	    SELECT AVG(salary) avg_sal
+	    FROM employees
+	    GROUP BY department_id
+);
+
+# 空值问题
+当内查询存在空值就会查询不到东西
+```
+
+
+
+### 3. 相关子查询
+
+#### 3.1 相关子查询执行流程
+
+如果子查询的执行依赖于外部查询，通常情况下都是因为子查询中的表用到了外部的表，并进行了条件关联，因此每执行一次外部查询，子查询都要重新计算一次，这样的子查询就称之为**关联子查询**。
+
+相关子查询按照一行接一行的顺序执行，主查询的每一行都执行一次子查询。
+
+```mysql
+# example
+
+# 题目：查询员工中工资大于本部门平均工资的员工的last_name, salary和其department_id
+# 相关子查询
+SELECT last_name, salary, department_id
+FROM employees e1
+WHERE salary > (
+	SELECT AVG(salary)
+    FROM employees e2
+    WHERE department_id = e1.`department_id`
+);
+
+# 题目：查询员工的id，salary，按照 department_name 排序
+SELECT employee_id, salary
+FROM employees e
+ORDER BY (
+	SELECT department_name
+    FROM departments d
+    WHERE e.`department_id` = d.`department_id	`
+);
+
+
+```
+
+
+
+### 4. EXISTS 与 NOT EXISTS 关键字
+
+* 关联子查询通常也会和**EXISTS**操作符一起来使用，用来检查在子查询中是否存在满足条件的行
+* 如果在子查询中不存在满足条件的行
+  * 条件返回**FALSE**
+  * 继续在子查询中查找
+* 如果在子查询中存在满足条件的行
+  * 不在子查询中继续查找
+  * 条件返回TRUE
+* NOT EXISTS 关键字表示如果不存在某种条件，则返回TRUE，否则返回FALSE
+
+```mysql
+# example
+
+# 题目：查询公司管理者的employee_id, last_name, job_id, department_id信息
+SELECT employee_id, last_name, job_id, department_id
+FROM employees e1
+WHERE EXISTS (
+	SELECT *
+    FROM employees e2
+    WHERE e1.`employee_id` = e2.`manager_id`
+);
+
+
+```
+
+
+
+
+
+### 结论
+
+在 **SELECT** 中，除了 **GROUP BY** 和 **LIMIT** 之外，其他位置都可以声明子查询！
+
+
+
+
+
+
+
+## 创建和管理表
+
+
+
+### 1 基础知识
+
+
+
+#### 1.1 一条数据存储的过程
+
+**存储数据是处理数据的第一步**。在**MySQL**中，一个完整的数据存储过程总共4步，分别是创建数据库、确认字段、创建数据表、插入数据。
+
+从系统架构的层次来看，MySQL数据库系统从小到大依次是**数据库服务器**、**数据库**、**数据表**、数据表的**行与列**
+
+
+
+#### 1.2 标识符命名规则
+
+* 数据库名、表名不得超过30个字符，变量名限制为29个
+* 必须只能包含A-Z，a-z，0-9，_共63个字符
+* 数据库名、表名、字段名等对象中间不要包含空格
+* 同一个**MySQL**软件中，数据库不能同名；同一个库中，表不能重名；同一个表中，字段不能重名
+* 必须保证你的字段没有和保留字、数据库系统或常用方法冲突。如果坚持使用，请在**SQL**语句中使用`（着重号）引起来
+* 保持字段名和类型的一致性：在命名字段并为其指定数据类型的时候一定要保证一致性，假如数据类型在一个表里是整数，那在另一个表里可就别变成字符型了
+
+
+
+#### 1.3 MySQL中的数据类型
+
+<img src = "img/MySQL中的数据类型.png">
+
+其中，常用的几类类型介绍如下：
+
+<img src = "img/常用的几类类型.png">
+
+
+
+### 2. 创建和管理数据库
+
+
+
+#### 2.1 创建数据库
+
+* 方式1：创建数据库
+
+```mysql
+CREATE DATABASE 数据库名;
+```
+
+* 方式2：创建数据库并指定字符集
+
+```mysql
+CREATE DATABASE 数据库名 CHARACTER SET 字符集;
+```
+
+* 方式3：判断数据库是否已存在，不存在则创建数据库（推荐）
+
+```mysql
+CREATE DATABASE IF NO EXISTS 数据库名;(CHARACTER SET 'utf8')
+```
+
+如果MySQL中已存在数据库，则忽略创建语句，不再创建数据库
+
+***注意：DATABASE不能改名。一些可视化工具可以改名，它是建新库，把所有表复制到新库，再删掉旧库完成的***
+
+
+
+#### 2.2 使用数据库
+
+* 查看当前所有数据库
+
+```mysql
+SHOW DATABASES; # 有一个S，代表多个数据库
+```
+
+* 查看当前正在使用的数据库
+
+```mysql
+SELECT DATABASE(); # 使用的一个mysql中的全局函数
+```
+
+* 查看指定库下所有的表
+
+```mysql
+SHOW TABLE FROM 数据库名;
+```
+
+* 查看数据库的创建信息
+
+```mysql
+SHOW CREATE DATABASE 数据库名;
+或者：
+SHOW CREATE DATABASE 数据库名\G
+```
+
+* 使用/切换数据库
+
+```mysql
+USE 数据库名;
+```
+
+* 查看当前数据库中保存的数据表
+
+```mysql
+SHOW TABLES;
+```
+
+* 查看当前使用的数据库
+
+```mysql
+SELECT DATABASE() FROM DUAL;
+```
+
+* 查看指定数据库下保存的数据表
+
+```mysql
+SHOW TABLES FROM 数据库名;
+```
+
+* 修改数据库
+  * 修改数据库数据库字符集
+
+```mysql
+ALTER DATABASE 数据库名 CHARACTER SET 'utf8';
+```
+
+
+
+### 3. 创建表
+
+* 必须具备：
+  * CREATE TABLE 权限
+  * 存储空间
+* 语法格式：
+
+```mysql
+CREATE TABLE [IF NOT EXISTS] 表名(
+	字段1, 数据类型 [约束条件] [默认值]
+    字段2, 数据类型 [约束条件] [默认值]
+    字段3, 数据类型 [约束条件] [默认值]
+    ...
+    [表约束条件]
+);
+```
+
+***加上了IF NOT EXISTS 关键字，则表示：如果当前数据库中不存在要创建的数据表，则创建数据表；如果当前数据库中已经存在要创建的数据表，则忽略建表语句，不再创建数据表***
+
+* 必须指定：
+  * 表名
+  * 列名（或字段名），数据类型，**长度**
+* 可选指定：
+  * 约束条件
+  * 默认值
+
+```mysql
+# example
+
+# 方式一
+# 需要用户具备创建表的权限
+CREATE TABLE IS NOT EXISTS myemp1 (
+	id INT,
+    emp_name VARCHAR(15),
+    hire_data DATE
+);
+# 查看表结构
+DESC myemp1;
+SHOW CREATE TABLE myemp1;
+
+# 方式二：基于现有的表
+CREATE TABLE myemp2
+AS
+SELECT employee_id, last_name, salary
+FROM employees;
+DESC myemp2;
+# 方式二同时会导入数据
+SELECT *
+FROM myemp2
+
+CREATE TABLE myemp3
+AS
+SELECT e.employee_id emp_id, e.last_name lname, d.department dept_name
+FROM employees e JOIN departments d
+ON e.department_id = d.department_id;
+
+# 练习：创建一个表employees_copy，实现对employees表的复制，包括表数据
+CREATE TABLE employees_copy
+AS
+SELECT *
+FROM employees; 
+
+# # 练习：创建一个表employees_blank，实现对employees表的复制，包括表数据
+CREATE TABLE employees_blank
+AS
+SELECT *
+FROM employees
+WHERE 1 = 2;
+```
+
+
+
+### 4. 修改表 --> ALTER TABLE
+
+
+
+#### 4.1 添加一个字段
+
+```mysql
+ALTER TABLE 表名 ADD 【COLUMN】字段名 字段类型 【FIRST | AFTER 字段名】
+```
+
+```mysql
+# example
+
+ALTER TABLE myemp1
+ADD salary DOUBLE(10, 2); # 默认添加到表中的最后一个字段的位置
+
+ALTER TABLE myemp1
+ADD phone_number VARCHAR(20) FIRST;
+
+ALTER TABLE myemp1
+ADD email VARCHAR(45) AFTER emp_name;
+```
+
+
+
+#### 4.2 修改一个字段：数据类型、长度、默认值（略）
+
+```mysql
+# example 
+
+ALTER TABLE myemp1
+MODIFY emp_name VARCHAR(25);
+
+ALTER TABLE myemp1
+MODIFY emp_name VARCHAR(35) DEFAULT 'AAA';
+```
+
+
+
+#### 4.3 重命名一个字段
+
+```mysql
+# example
+
+ALTER TABLE myemp1
+CHANGE salary monthly_salary DOUBLE(10, 2);
+
+ALTER TABLE myemp1
+CHANGE email my_email VARCHAR(50);
+```
+
+
+
+#### 4.4 删除一个字段
+
+```mysql
+ALTER TABLE myemp1
+DROP COLUMN my_email;
+```
+
+
+
+
+
+### 5. 重命名表
+
+* 方式一：使用**RENAME**
+
+```mysql
+RENAME TABLE emp
+TO myemp;
+```
+
+```mysql
+# example
+
+RENAME TABLE myemp
+TO myemp11;
+```
+
+* 方式二：
+
+```mysql
+ALTER TABLE dept
+RENAME [TO] detail_dept; -- [TO] 可以省略
+```
+
+```mysql
+# example
+
+ALTER TABLE myemp2
+RENAME TO myemp12;
+```
+
+* 必须是对象的拥有者
+
+
+
+
+
+### 6. 删除表
+
+* 在**MySQL**中，当一个数据表**没有与其他任何数据表形成关联关系**时，可以将当前数据表直接删除。
+* 数据和结构都被删除
+* 所有在运行的相关事务被提交
+* 所有相关索引被删除
+* 语法格式：
+
+```mysql
+DROP TABLE [IF EXISTS] 数据表1 [, 数据表2, ..., 数据表n];
+```
+
+**IF EXISTS**的含义为：如果当前数据库中存在相应的数据表，则删除数据表；如果当前数据库中不存在相应的数据表，则忽略删除语句，不再执行删除数据表的操作。
+
+* **DROP TABLE** 语句不能回滚
+
+```mysql
+# example
+
+# 删除表
+DROP TABLE IF EXISTS myemp2;
+
+DROP TABLE IF EXISTS myemp12;
+```
+
+
+
+
+
+### 7. 清空表
+
+* **TRUNCATE TABLE**语句：
+  * 删除表中所有的数据
+  * 释放表的存储空间
+
+```mysql
+# example 
+
+TRUNCATE TABLE default_dept;
+```
+
+* **TRUNCATE TABLE**语句**不能回滚**，而使用**DELETE**语句删除数据，可以回滚
+
+```mysql
+# example
+
+# 清空表，表示清空表中的所有数据，但是表结构保留
+
+SELECT * FROM employees_copy;
+
+TRUNCATE TABLE employeees_copy;
+
+SELECT * FROM employees_copy;
+
+DESC employees_copy;
+```
+
+
+
+
+
+
+
+## DCL 中 COMMIT 和 ROLLBACK
+
+* **COMMIT**：提交数据。一旦执行**COMMIT**，则数据就被永久的保存在了数据库中，意味着数据不可以回滚
+* **ROLLBACK**：回滚数据。一旦执行**ROLLBACK**，则可以实现数据的回滚。回滚到最近的一次**COMMIT**之后
+
+* 对比 **TRUNCATE TABLE** 和 **DELETE FROM**
+  * 相同点：都可以实现对表中所有数据的删除，同时保留表的结构
+  * 不同点：
+    * **TRUNCATE TABLE**：一旦执行操作，表数据全部清除。同时，数据是不可以回滚的
+    * **DELETE FROM**：一旦执行此操作，表数据可以全部清除（不带**WHERE**）。同时，数据是可以实现回滚
+* **DDL** 和 **DML** 的说明
+  * **DDL** 的操作一旦执行，就不可回滚。指令**SET autocommit = FALSE**对**DDL**操作失效（因为在执行完**DDL**，一定会执行一次**COMMIT**，而此**COMMIT**操作不受**SET autocommit = FALSE**影响）
+  * **DML** 的操作默认情况，一旦执行也是不可回滚的。但是，如果在执行**DML**之前，执行了`SET autocommit = FALSE`，则执行的**DML**操作就可以实现回滚
+
+```mysql
+# example
+
+--- DELETE FROM
+# 1)
+SET autocommit = FALSE
+# 2) 
+DELETE FROM myemp3;
+# 3)
+SELECT * FROM myemp3;
+# 4)
+ROLLBACK;
+# 5)
+SELECT * FROM myemp3; # 数据回来了
+
+--- TRUNCATE TABLE
+# 1)
+COMMIT; # 先将上面的操作保存下
+SET autocommit = FALSE # 上面执行了，其实没有必要再执行了
+# 2) 
+TRUNCATE TABLE myemp3;
+# 3)
+SELECT * FROM myemp3;
+# 4)
+ROLLBACK;
+# 5)
+SELECT * FROM myemp3; # 数据没有回来
+```
+
+***阿里开发规范：【参考】TRUNCATE TABLE 比 DELETE 速度快，且使用的的系统和事务日志资源少，但TRUNCATE 无事务且不接触TRIGGER，有可能造成事故，故不建议在开发代码中使用此句***
+
+```mysql
+# MySQL8.0新特性：DDL的原子化
+
+CREATE DATABASE mytest;
+
+USE mytest;
+
+CREATE TABLE book1(
+	book_id 	INT,
+    book_name	VARCHAR(255)
+);
+
+SHOW TABLES;
+
+DROP TABLE book1, book2;
+
+SHOW TABLES; # MySQL5.x的话book1已经被删除，MySQL8.0报错会回滚book1还在
+```
 
