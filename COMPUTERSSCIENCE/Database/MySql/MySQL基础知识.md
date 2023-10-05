@@ -2010,3 +2010,1728 @@ DROP TABLE book1, book2;
 SHOW TABLES; # MySQL5.x的话book1已经被删除，MySQL8.0报错会回滚book1还在
 ```
 
+
+
+
+
+
+
+## 数据处理之增删改
+
+
+
+### 1. 插入数据
+
+
+
+#### 1.1 方式一：VALUES 的方式添加
+
+```mysql
+# example
+
+# 储备工作
+USE testdb;
+
+CREATE TABLE IF NOT EXISTS emp1 (
+	id 			INT,
+    `name` 		VARCHAR(15),
+    hire_date	DATE,
+    salary		DOUBLE(10, 2)
+);
+
+DESC emp1;
+
+
+# 添加数据
+# 1.
+# 正确的
+INSERT INTO emp1
+VALUES (1, 'testname1', '2001-09-26', 10000000);
+# 2.
+# 正确的
+# 指明要添加的字段（推荐）
+INSERT INTO emp1(id, hire_date, salary, `name`)
+VALUES (2, '20001-09-26', 50000000, 'testname2');
+# 说明：没有进行赋值的hire_date值为 null
+INSERT INTO emp1(id, salary, `name`)
+VALUES (3, 50000000, 'testname3');
+# 同时插入多条记录 （推荐）
+INSERT INTO emp1(id, NAME, salary)
+VALUES
+(4, 'testname4', 400000000),
+(5, 'testname5', 800000000);
+```
+
+
+
+#### 1.2 方式二：将查询内容插入到表中
+
+```mysql
+# example
+
+SELECT * FROM emp1;
+
+INSERT INTO emp1(id, NAME, salary, hire_date)
+SELECT employee_id, last_name, salary, hire_date # 查询的字段一定要与添加到的表的字段一一对应
+FROM employees
+WHERE dapartment_id IN (70, 60);
+
+# 说明：emp1表中要添加数据的字段的长度不能低于employees表中查询的字段的长度
+# 如果emp1表中要添加数据的字段的长度低于employees表中查询的字段的长度，就有1添加不成功的风险
+```
+
+
+
+### 2. 更新数据（或修改数据）
+
+* `UPDATE ... SET ... WHERE ...`
+
+```mysql
+# example
+
+UPDATE emp1
+SET hire_date = CURDATE()
+WHERE id = 5;
+
+# 同时修改一条数据的多个字段
+UPDATE emp1
+SET hire_date = CURDATE(), salary = 13145209
+WHERE id = 4;
+
+
+# 练习：将表中姓名中包含字符a的提薪20%
+UPDATE emp1
+SET salary = salary * 1.2
+WHERE NAME LIKE '%a%';
+
+# 修改数据时，是可能存在不成功的情况的。（可能是由于约束的影响造成的）
+```
+
+
+
+### 3. 删除数据
+
+```mysql
+# example
+
+DELETE FROM emp1
+WHERE id = 1;
+
+# 删除数据时，也有可能因为约束的影响，导致删除失败
+DELETE FROM departments
+WHERE department_id = 50;
+
+# 小结：DML操作默认情况下，执行完以后都会自动提交数据
+# 如果希望执行完以后不自动提交数据，则需要使用 SET autocommit = FALSE 。
+```
+
+
+
+### 4. MySQL新特性：计算列
+
+简单来说，就是某一列的值是通过别的列计算得来的。
+
+```mysql
+# example
+
+USE emp1;
+
+CREATE TABLE test1 (
+	a INT,
+    b INT,
+    c INT GENRATED ALWAYS AS (a + b) VIRTUAL # 字段c即为计算列
+);
+
+INSERT INTO test1(a, b)
+VALUES(10, 20);
+
+SELECT * FROM test1;
+
+UPDATE test1 
+SET a = 100;
+
+SELECT * FROM test1;
+```
+
+
+
+
+
+
+
+## MySQL数据类型精讲
+
+
+
+### 1. MySQL中的数据类型
+
+<img src = "img/MySQL中的数据类型.png">
+
+常见数据类型的属性，如下：
+
+<img src = "img/常见数据类型的属性.png">
+
+```mysql
+# example
+
+# 关于属性：character set name
+
+# 创建数据库时指定字符集
+CREATE DATABASE IF NOT EXISTS dbtest12 CHARACTER SET 'utf8';
+SHOW CREATE DATABASE dbtest12;
+# 创建表的时候，指名表的字符集
+CREATE TABLE temp (
+    id INT
+) CHARACTER SET 'utf8';
+SHOW CREATE TABLE temp;
+
+# 创建表，指名表中的字段时，可以指定字段的字符集
+CREATE TABLE temp1 (
+	id INT,
+    NAME VARCHAR(15) CHARACTER SET 'gbk'
+);
+SHOW CREATE TABLE temp1;
+```
+
+
+
+### 2. 整数类型
+
+#### 2.1 类型介绍
+
+整数类型一共有5种，包括TINYINT，SAMLLINT，MEDIUMINT，INT（INTEGER）和BIGINT。
+
+它们区别如下表所示：
+
+<img src = "img/整数类型区别.png">
+
+```mysql
+# example
+
+USE dbtest12;
+
+CREATE TABLE test_int1 (
+	f1 	TINYINT,
+    f2	SMALLLINT,
+    f3	MEDIUMINT,
+    f4	INTEGER,
+    f5	BIGINT
+);
+```
+
+#### 2.2 可选属性
+
+整数类型的可选属性有三个：
+
+##### 2.2.1 M
+
+**M**：表示显示宽度，M的取值范围是（0， 255）。
+
+***显示宽度与类型可以存储的值范围无关***
+
+```mysql
+# example
+
+CREATE TABLE test_int2 (
+	f1	INT,
+    f2	INT(5),
+    f3	INT(5) ZEROFILL # 指不满5位宽度用0填充
+);
+```
+
+##### 2.2.2 UNSIGNED
+
+**UNSIGNED**：无符号类型（非负），所有的整数类型都有一个可选的属性**UNSIGNED**（无符号属性），无符号整数的最小取值为0。
+
+##### 2.2.3 ZEROFILL
+
+**ZEROFILL**：0填充，（如果某列是**ZEROFILL**，那么**MySQL**会自动为当前列添加**UNSIGNED**属性），如果指定了**ZEROFILL**只是表示不够**M**位时，用0在左边填充，如果超过**M**位，只要不超过数据存储范围即可。
+
+
+
+### 3. 浮点类型
+
+
+
+#### 3.1 类型介绍
+
+浮点数和顶点数类型的特点是可以**处理小数**，你可以把整数看出小数的一个特例。因此，浮点数和定点数的使用场景，比整数大多了。**MySQL**支持的浮点数类型，分别是**FLOAT**、**DOUBLE**、**REAL**
+
+<img src = "img/mysql支持的浮点数类型.png">
+
+```mysql
+# example
+
+CREATE TABLE test_double1 (
+	f1 	FLOAT,
+    f2 	FLOAT(5, 2),
+    f3	DOUBLE,
+    f4	DOUBLE(5, 2)
+);
+
+INSERT INTO test_double1(f3, f4)
+VALUES (123.45, 123.456); # 存在四舍五入
+
+# Out of range value for column 'f4' at row 1
+INSERT INTO test_double1(f3, f4)
+VALUES (123.45, 1234.456)
+```
+
+#### 3.2 精度误差说明
+
+浮点数类型有个缺陷，就是不精确。
+
+```mysql
+# example
+
+CREATE TABLE test_double2 (
+	f1 DOUBLE
+);
+
+INSERT INTO test_double2
+VALUES (0.47), (0.44), (0.19);
+
+SELECT SUM(f1)
+FROM test_double2;
+
+SELECT SUM(f1) = 1.1 # 为0
+FROM test_double2;
+```
+
+因为浮点数是不准确的，所以我们要避免使用`=`来判断两个数是否相等
+
+
+
+### 4. 定点数类型
+
+
+
+#### 4.1 类型介绍
+
+* **MySQL**中的定点数类型只有**DECIMAL**一种类型
+
+| 数据类型                    | 字节数    | 含义               |
+| --------------------------- | --------- | ------------------ |
+| DECIMAL(M, D), DEC, NUMERIC | M + 2字节 | 有效范围由M和D决定 |
+
+使用 DECIMAL(M, D) 的方式表示高精度小数。其中，M被称为精度，D被称为标度。
+
+* **DECIMAL(M, D)的最大取值范围与DOUBLE类型一样**
+
+* 定点数在**MySQL**内部是以字符串的形式进行存储，这就决定了它一定是精准的。
+* 当**DECIMAL**类型不指定精度和标度是，其默认为**DECIMAL(10, 0)**。当数据的精度超出了定点数类型的精度范围时，则**MySQL**同样会进行四舍五入处理
+
+* **浮点数** vs **定点数**
+  * 浮点数相对于定点数的优点是在长度一定的情况下，浮点数取值范围大，但不精准，适用于需要取值范围大，又可以容忍微小误差的科学计算场景（比如计算化学，分子建模，流体动力学等）
+  * 定点数类型取值范围相对小，但是精准，没有误差，适合于对精度要求极高的场景（比如涉及金额计算的场景）
+
+```mysql
+# example
+
+CREATE TABLE test_decimall (
+	f1	DECIMAL,
+    f2	DECIMAL(5, 2)
+);
+
+DESC test_decimall;
+
+INSERT INTO test_decimall(f1)
+VALUES(123), (123.45); # 后一个f1会四舍五入
+
+INSERT INTO test_decimall(f2)
+VALUES(67.567); # 存在四舍五入
+
+# Out of range value for column 'f2' at row 1
+INSERT INTO test_decimall(f2)
+VALUES(1267.567); # 存在四舍五入
+```
+
+
+
+
+
+### 5. 位类型：BIT
+
+**BIT**类型中存储的是二进制，类似010110
+
+| 二进制字符串类型 | 长度 | 长度范围     | 占用空间            |
+| ---------------- | ---- | ------------ | ------------------- |
+| BIT(M)           | M    | 1 <= M <= 64 | 约为（M+7）/8个字节 |
+
+**BIT**类型，如果没有指定（M），默认是1位。这个1位，表示只能存1位的二进制值。这里（M）是表示二进制的位数，位数最小值为1，最大值为64
+
+```mysql
+CREATE TABLE test_bit1 (
+	f1	BIT,
+    f2	BIT(5),
+    f3	BIT(64)
+);
+
+DESC test_bit1;
+
+INSERT INTO test_bit1(f1)
+VALUES (0), (1);
+
+SELECT * 
+FROM test_bit1;
+
+# Data too long for column 'f1' at row 1
+INSERT INTO test_bit1(f1)
+VALUES (2);
+```
+
+使用**SELECT**命令查询位字段时，可以用**BIN()**或**HEX()**函数进行读取
+
+
+
+
+
+### 6. 日期与时间类型
+
+**MySQL**有多种表示日期和时间的数据类型，不同的版本可能有所差异，**MySQL8.0**版本支持的日期和时间类型主要有：**YEAR类型**、**TIME类型**、**DATE类型**、**DATETIME类型**和**TIMESTAMP类型**
+
+* **YEAR**类型通常用来表示年
+* **DATE**类型通常用来表示年、月、日
+* **TIME**类型通常用来表示时、分、秒
+* **DATETIME**类型通常用来表示年、月、日、时、分、秒
+* **TIMESTAMP**类型通常用来表示时区的年、月、日、时、分、秒
+
+| 类型      | 名称     | 字节 | 日期格式            | 最小值                  | 最大值                  |
+| --------- | -------- | ---- | ------------------- | ----------------------- | ----------------------- |
+| YEAR      | 年       | 1    | YYYY或YY            | 1901                    | 2155                    |
+| TIME      | 时间     | 3    | HH:MM:SS            | -838:59:59              | 838:59:59               |
+| DATE      | 日期     | 3    | YYYY-MM-DD          | 1000-01-01              | 9999-12-03              |
+| DATETIME  | 日期时间 | 8    | YYYY-MM-DD HH:MM:SS | 1000-01-01 00:00:00     | 9999-12-31 23:59:59     |
+| TIMESTAMP | 日期时间 | 4    | YYYY-MM-DD HH:MM:SS | 1970-01-01 00:00:00 UTC | 2038-01-19 03:14:01 UTC |
+
+#### 6.1 YEAR 类型
+
+**YEAR**类型用来表示年份，在所有的日期时间类型中所占用的存储空间最小，只需要**1个字节**的存储空间
+
+在**MySQL**中，**YEAR**有以下几种存储格式：
+
+* 以**4**位字符串或数字格式表示**YEAR**类型，其格式位**YYYY**，最小值位**1901**，最大值位**2155**
+* 以**2**位字符串格式表示**YEAR**类型，最小值为**00**，最大值为**99**
+  * 当取值为**01**到**69**时，表示**2001**到**2069**
+  * 当取值为**70**到**99**时，表示**1970**到**1999**
+  * 当取值整数的**0**或**00**添加的话，那么是**0000**年
+  * 当取值是日期/字符串的**'0'**添加的话，是**2000**年
+
+***从MySQL5.5.27开始，2位格式的YEAR已经不推荐使用***
+
+#### 6.2 DATE 类型
+
+**DATE**类型表示日期，没有时间部分，格式为`YYYY-MM-DD`，其中，`YYYY`表示年份，`MM`表示月份，`DD`表示日期。需要`3个字节`的存储空间
+
+#### 6.3 TIME 类型
+
+`TIME`类型用来表示时间，不包含日期部分。在`MySQL`中，需要**3个字节**的存储空间来存储**TIME**类型的数据
+
+在**MySQL**中，向**TIME**类型的字段插入数据时，也可以使用几种不同的格式
+
+1. 可以使用带有冒号的字符串，比如`D HH:MM:SS`、`HH:MM:SS`、`HH:MM`、`D HH:MM`、`D HH`或`SS`格式，都能被正确地插入`TIME`类型的字段中。
+2. 可以使用不带冒号的字符串或者数字，格式为`HHMMSS`或`HHMMSS`
+3. 使用`CURRENT_TIME()`或者`NOW()`，会插入当前系统时间
+
+#### 6.4 DATETIME类型
+
+**DATETIME**类型在所有的日期时间类型中占有的存储空间最大，总共需要**8**个字节的存储空间。在格式上为**DATE**类型和**TIME**类型的组合，可以表示为**YYYY-MM-DD HH:MM:SS**，其中**YYYY**表示年份，**MM**月份，**DD**表示日期，**HH**表示小时，**MM**表示分钟，**SS**表示秒
+
+1. 比如`YYYY-MM-DD HH:MM:SS`或者`YYYYMMDDHHMMSS`格式
+2. 格式为`YY-MM-DD HH:MM:SS`或`YYMMDDHHMMSS`
+3. 使用`CURRENT_TIME()`或者`NOW()`，会插入当前系统时间
+
+#### 6.5 TIMESTAMP类型
+
+**TIMESTAMP**类型也可以表示日期时间，其显示格式与**DATETIME**类型相同，都是**YYYY-MM-DD HH:MM:SS**，需要**4**个字节的存储空间。但是**TIMESTAMP**存储的时间范围比**DATETIME**要小很多
+
+* **存储数据的时候需要对当前时间所在的时区进行转换，查询数据的时候再将时间转换回当前的时区。因此，使用TIMESTAMP存储的同一个时间值，在不同的时区查询会显示不同的时间**
+
+向**TIMESTAMP**类型的字段插入数据时，当插入的数据格式满足**YY-MM-DD HH:MM:SS**和**YYMMDDHHMMSS**时，两位数值的年份同样符合**YEAR**类型的规则条件，只不过表示的时间范围要小很多
+
+***TIMESTAMP 和 DATETIME 的区别***
+
+* **TIMESTAMP**存储空间比较小，表示的日期时间范围也比较小
+* 底层存储方式不同，**TIMESTAMP**底层存储的是毫秒值，距离`1970-1-1 0:0:0 0`毫秒的毫秒值
+* 两个日期比较大小或日期计算时，**TIMESTAMP**更方便、更快
+* **TIMESTAMP**和时区有关。**TIMESTAMP**会根据用户的时区不同，显示不同的结果。而**DATETIME**则只能反映出插入时当地的时区，其他时区的人查看数据必然会有误差
+
+
+
+#### 6.6 开发中的经验
+
+用得最多的日期时间，就是**DATETIME**。
+
+此外，一般存注册时间、商品发布时间等，不建议使用**DATETIME**存储，而是使用**时间戳**，因为**DATETIME**虽然直观，但不便于计算
+
+
+
+
+
+
+
+### 7. 文本字符串类型
+
+**MySQL**中，文本字符串总体上分为**CHAR**、**VARCHAR**、**TINYTEXT**、**TEXT**、**MEDIUMTEST**、**LONGTEXT**、**ENUM**、**SET**等类型
+
+| 文本字符串类型 | 值的长度 | 长度范围         | 占用的存储空间      |
+| -------------- | -------- | ---------------- | ------------------- |
+| CHAR(M)        | M        | 0<=M<=255        | M个字节             |
+| VARCHAR(M)     | M        | 0<=M<=65535      | M+1个字节           |
+| TINYTEXT       | L        | 0<=L<=255        | L+2个字节           |
+| TEXT           | L        | 0<=L<=65535      | L+2个字节           |
+| MEDIUMTEXT     | L        | 0<=L<=16777215   | L+3个字节           |
+| LONGTEXT       | L        | 0<=L<=4294967295 | L+4个字节           |
+| ENUM           | L        | 1<=L<=65535      | 1或2个字节          |
+| SET            | L        | 0<=L<=64         | 1，2，3，4或8个字节 |
+
+#### 7.1 CHAR 与 VARCHAR 类型
+
+**CHAR**和**VARCHAR**类型都可以存储比较短的字符串
+
+| 字符串（文本）类型 | 特点     | 长度 | 长度范围    | 占用的存储空间       |
+| ------------------ | -------- | ---- | ----------- | -------------------- |
+| CHAR(M)            | 固定长度 | M    | 0<=M<=255   | M个字节              |
+| VARCHAR(M)         | 可变长度 | M    | 0<=M<=65535 | （实际长度+1）个字节 |
+
+**CHAR类型**
+
+* **CHAR(M)**类型一般需要预定先定义字符串长度。如果不指定（M），则表示长度默认是`1`个字符
+* 如果保存时，数据的实际长度比**CHAR**类型声明的长度小，则会在**右侧填充**空格以达到指定的长度。当**MySQL**检索**CHAR**类型的数据时，**CHAR**类型的字段会去除尾部的空格
+* 定义**CHAR**类型字段时，声明的字段长度即为**CHAR**类型字段所占的存储空间的字节数
+
+
+
+#### 7.2 VARCHAR类型
+
+* **VARCHAR(M)**定义时，**必须指定**长度M，否则报错
+
+* **MySQL4.0**版本以下，**varchar（20）**：指的是20字节，如果存放UTF8汉字时，只能存6个（每个汉字3字节）
+
+  **Mysql5.0**版本以上，**varchar（20）**：指的是20字符
+
+  * 检索**VARCHAR**类型的字段数据时，会保留数据尾部的空格。**VARCHAR**类型的字段所占用的存储空间为字符串实际长度加1个字节
+
+
+
+***那些情况使用CHAR 或 VARCHAR 更好***
+
+| 类型       | 特点     | 空间上       | 时间上 | 适用场景             |
+| ---------- | -------- | ------------ | ------ | -------------------- |
+| CHAR(M)    | 固定长度 | 浪费存储空间 | 效率高 | 存储不大，速度要求高 |
+| VARCHAR(M) | 可变长度 | 节省存储空间 | 效率低 | 非CHAR的情况         |
+
+
+
+#### 7.3 TEXT 类型
+
+在**MySQL**中，**TEXT**用来保存文本类型的字符串，总共包含4种类型，分别是**TINYTEXT**、**TEXT**、**MEDIUMTEXT**和**LONGTEXT**类型
+
+在向**TEXT**类型的字段保存和查询数据时，系统自动按照实际长度存储，不需要预先定义长度。这一点和**VARCHAR**类型相同
+
+每种**TEXT**类型保存的数据长度和所占用的存储空间不同
+
+| 文本字符串类型 | 特点               | 长度 | 长度范围                      | 占用的存储空间 |
+| -------------- | ------------------ | ---- | ----------------------------- | -------------- |
+| TINYTEXT       | 小文本、可变长度   | L    | 0<=L<=255                     | L + 2个字节    |
+| TEXT           | 文本，可变长度     | L    | 0<=L<=65535                   | L + 2个字节    |
+| MEDIUMTEXT     | 中等文本，可变长度 | L    | 0<=L<=16777215                | L + 3个字节    |
+| LONGTEXT       | 大文本、可变长度   | L    | 0<=L<=4294967295（相当于4GB） | L + 4个字节    |
+
+**由于实际存储的长度不确定，MySQL不允许TEXT类型的字段做主键**
+
+
+
+
+
+
+
+### 8. ENUM类型
+
+**ENUM**类型也叫作枚举类型，**ENUM**类型的取值范围需要在定义字段时进行指定。设置字段值时，**ENUM**类型只允许从成员中选取单个值，不能一次选取多个值
+
+其所需要的存储空间由定义**ENUM**类型时指定的成员个数决定
+
+| 文本字符串类型 | 长度 | 长度范围    | 占用的存储空间 |
+| -------------- | ---- | ----------- | -------------- |
+| ENUM           | L    | 1<=L<=65535 | 1或2个字节     |
+
+```mysql
+# example
+
+CREATE TABLE test_enum (
+	season ENUM('春', '夏', '秋', '东', 'unknow')
+);
+```
+
+
+
+
+
+
+
+### 9. SET 类型
+
+**SET**表示一个字符串对象，可以包含0个或多个成员，但成员个数的上限为**64**。设置字段值时，可以取取值范围内的0个或多个值
+
+当**SET**类型包含的成员个数不同时，其所占用的存储空间也是不同的
+
+| 成员个数范围（L表示实际成员个数） | 占用的存储空间 |
+| --------------------------------- | -------------- |
+| 1<=L<=8                           | 1个字节        |
+| 9<=L<=16                          | 2个字节        |
+| 17<=L<=24                         | 3个字节        |
+| 25<=L<=32                         | 4个字节        |
+| 33<=L<=64                         | 8个字节        |
+
+**SET**类型在存储数据时成员个数越多，其占用的存储空间越大。注意：**SET**类型在选取成员时，可以一次选择多个成员，这一点于**ENUM**类型不同
+
+
+
+
+
+
+
+### 10. 二进制字符串类型
+
+**MySQL**中的二进制字符串类型主要存储一些二进制数据，比如可以存储图片、音频和视频等二进制数据
+
+**MySQL**中支持的二进制字符串类型主要包括**BINARY**、**VARBINARY**、**TINYBLOB**、**BLOB**、**MEDIUMBLOB**和**LONGBLOB**类型
+
+
+
+#### BINARY与VARBINARY类型
+
+**BINARY**和**VARBINARY**类似于**CHAR**和**VARCHAR**，只是它们存储的是二进制字符串	
+
+
+
+#### BLOB类型
+
+**BLOB**是一个**二进制大对象**，可以容纳可变数量的数据
+
+| 二进制字符串类型 | 值的长度 | 长度范围                      | 占用空间    |
+| ---------------- | -------- | ----------------------------- | ----------- |
+| TINYBLOB         | L        | 0<=L<=255                     | L + 1个字节 |
+| BLOB             | L        | 0<=L<=65535（相当于64kb）     | L + 2个字节 |
+| MEDIUMBLOB       | L        | 0<=L<=16777215 （相当于16MB） | L + 3个字节 |
+| LONGBLOB         | L        | 0<=L<=4294967295（相当于4GB） | L + 4个字节 |
+
+
+
+
+
+
+
+### 11. JSON类型
+
+**JSON**（JavaScript Object Notation）是一种轻量级的**数据交换格式**。**JSON**可以将**JavaScript**对象中表示的一组数据转换为字符串，然后就可以在网络或者程序之间轻松地传递这个字符串，并在需要的时候将它还原为各编程语言所支持的数据格式
+
+```mysql
+# example
+
+CREATE TABLE test_json (
+	js json
+);
+
+INSERT INTO test_json (js)
+VALUES ('{"name":"testName", "address":{"city":"shanghai"}}');
+
+SELECT js -> '$.name' AS NAME
+FROM test_json;
+```
+
+
+
+
+
+
+
+## 约束
+
+为了保证数据的完整性，**SQL**规范以约束的方式对**表数据进行额外的条件限制**。从以下四个方面考虑
+
+* **实体完整性(Entity Integrity)**
+* **域完整性(Domain Integrity)**
+* **引用完整性(Referential Integrity)**
+* **用户自定义完整性(User-defined Integrity)**
+
+```mysql
+# example
+
+# 按约束的作用分类（或功能）
+not null --- 非空约束
+unique --- 唯一性约束
+primary key --- 主键约束
+foreign key --- 外键约束
+check --- 检查约束
+default --- 默认值约束
+
+# 添加/删除约束
+CREATE TABLE --- 添加约束
+ALTER TABLE --- 添加、删除约束
+```
+
+```mysql
+# example
+
+# 如何查看表中的约束
+SELECT * 
+FROM information_schema.table_constraints
+WHERE table_name = 'employees';
+```
+
+### 1. 非空约束 *
+
+**作用**
+
+限定某个字段/某列的值不允许为空
+
+**关键字**
+
+NOT FULL
+
+**特点**
+
+* 默认，所有的类型的值都可以是NULL，包括INT，FLOAT等数据类型
+* 非空约束只能出现在表对象的列上，只能某个列单独限定非空，不能组合非空
+* 一个表可以有很多列都分别限定了非空
+* 空字符串""不等于NULL，0也不等于NULL
+
+```mysql
+# example
+
+CREATE TABLE dbtest13;
+USE dbtest13;
+
+CREATE TABLE test1 (
+	id INT NOT NULL,
+    last_name VARCHAR(15) NOT NULL,
+    email VARCHAR(25),
+    salary DECIMAL(10, 2)
+);
+
+
+# ALTER TABLE方式
+ALTER TABLE test1
+MODIFY email VARCHAR(15) NOT NULL;
+```
+
+
+
+### 2. 唯一性约束 *
+
+**作用**
+
+用来限制某个字段/某列的值不能重复
+
+**关键字**
+
+UNIQUE
+
+**特点**
+
+* 同一个表可以有多个唯一约束
+* 唯一约束可以是某一个列的值唯一，也可以多个列组合的值唯一
+* 唯一性约束允许列值为空
+* 在创建唯一约束的时候，如果不给唯一约束命名，就默认和列名相同
+* **MySQL会给唯一约束的列上默认创建一个唯一索引**
+
+```mysql
+CREATE TABLE test2 (
+	id INT UNIQUE, # 列级约束
+    last_name VARCHAR(15),
+    email VARCHAR(25) UNIQUE,
+    salary DECIMAL(10, 2),
+    
+    # 表级约束
+    CONSTRAINT uk_test2_email UNIQUE(email)
+);
+
+SELECT *
+FROM information_schema.table_constraints
+WHERE table_name = 'test2';
+# 可以向声明为 UNIQUE 的字段上添加null值
+
+# ALTER TABLE 添加约束
+ALTER TABLE test2
+ADD CONSTRAINT uk_test2_sal UNIQUE(salary);
+
+ALTER TABLE test2
+MODIFY last_name VARCHAR(15) UNIQUE;
+
+# 方式一
+ALTER TABLE 表名称 ADD UNIQUE key(字段列表);
+# 方式二
+ALTER TABLE 表名称 MODIFY 字段名 字段类型 UNIQUE;
+
+
+# 复合的唯一性约束
+CREATE TABLE USER (
+	id INT,
+    `name` VARCHAR(15),
+    `password` VARCHAR(25),
+    
+    # 表级约束
+    CONSTRAINT uk_user_name_pwd UNIQUE(`NAME`, `PASSWORD`)
+);
+```
+
+#### 2.1 删除唯一性约束
+
+* 添加唯一性约束的列上也会自动创建唯一索引
+* 删除唯一约束只能通过删除唯一索引的方式删除
+* 删除时需要指定唯一索引名，唯一索引名就和唯一约束名一样
+* 如果创建唯一约束时未指定名称，如果是单列，就默认和列名相同；如果是组合列，那么就默认和（）中排在第一个的列名相同。也可以自定义唯一性约束名
+
+```mysql
+# example
+
+
+ALTER TABLE test2
+DROP INDEX last_name;
+```
+
+
+
+
+
+## PRIMARY KEY 约束 *
+
+**作用**
+
+用来唯一标识表中的一行记录
+
+**关键字**
+
+PRIMARY KEY
+
+**特点**
+
+* 主键约束相当于**唯一约束+非空约束的组合**，主键约束列不允许重复，也不允许出现空值
+* 一个表最多只能有一个主键约束，建立主键约束可以在列级别创建，也可以在表级别上创建
+* 主键约束对应着表中的一列或者多列（复合主键）
+* 如果是多列组合的复合主键约束，那么这些列都不允许为空值，并且组合的值不允许重复
+* **MySQL的主键名总是PRIMARY**，就算自己命名了主键约束名也没用
+* 当创建主键约束时，系统默认会在所在的列或者列组合上建立对应的**主键索引**（能够根据主键查询的，就根据主键查询，效率更高）。如果删除主键约束了，主键约束对应的索引就自动删除了
+* 需要注意的一点是，不要修改主键字段的值。因为主键是数据记录的唯一标识，如果修改了主键的值，就有可能破坏数据的完整性
+
+```mysql
+# example
+
+# 在CREATE TABLE时添加约束
+CREATE TABLE test3 (
+    		# 列级约束
+	id INT PRIMARY KEY,
+    last_name VARCHAR(15),
+    salary DECIMAL(10, 2),
+    email VARCHAR(25)
+);
+CREATE TABLE test4 (
+	id INT,
+    last_name VARCHAR(15),
+    salary DECIMAL(10, 2),
+    email VARCHAR(25),
+    # 表级约束
+    CONSTRAINT pk_test5_id PRIMARY KEY(id) # 还是会叫PRIMARY，主键自己命名没有用
+);
+
+
+# 在ALTER TABLE 时添加约束
+CREATE TABLE test6 (
+	id INT,
+    last_name VARCHAR(15),
+    salary DECIMAL(10, 2),
+    email VARCHAR(25)
+);
+
+ALTER TABLE test6
+ADD PRIMARY KEY(id);
+
+
+# 删除主键约束(在实际开发中，不会去删除表的主键约束)
+ALTER TABLE test6 DROP PRIMARY KEY;
+```
+
+
+
+## 自增列：AUTO_INCREMENT
+
+**作用**
+
+某个字段的值自增
+
+**关键字**
+
+auto_increment
+
+**特点和要求**
+
+1. 一个表最多只能有一个自增长列
+2. 当需要产生唯一标识符或顺序值时，可设置自增长
+3. 自增长列约束的列必须是键列（主键列，唯一键列）
+4. 自增约束的列的数据类型必须是整数类型
+5. 如果自增列指定了**0**和**null**，会在当前最大值的基础上自增；如果自增列手动指定了具体值，直接复制为具体值
+
+```mysql
+# example
+
+# 自增长列：AUTO_INCREMENT
+CREATE TABLE test7 (
+	id INT PRIMARY KEY AUTO_INCREMENT,
+    last_name VARCHAR(15)
+);
+# 当向主键（含AUTO_INCREMENT）的字段上添加0或null时，实际上会自动地往上添加指定的字段的数值
+# 开发中，一旦主键作用的字段上声明有AUTO_INCREMENT，则我们在添加数据时，就不要给主键对应的字段赋值了
+
+
+# 在 ALTER TABLE 时添加
+CREATE TABLE test8 (
+	id INT PRIMARY KEY,
+    last_name VARCHAR(15)
+);
+ALTER TABLE test8
+MODIFY id INT AUTO_INCREMENT;
+# 在 ALTER TABLE 时删除
+ALTER TABLE test8
+MODIFY id INT;
+```
+
+**MySQL8.0新特性：自增持久化**
+
+在**MySQL5.7**系统中，对于自增主键的分配规则，是由innoDB数据字典内部一个**计数器**来决定的，而该计数器只在**内存中维护**，并不会持久到磁盘中。当数据库重启时，该计数器会被初始化
+
+**MySQL8.0**将自增逐渐的计数器持久化到**重做日志**中。每次计数器发生改变，都会将其写入重做日志中。如果数据库重启，**innoDB**会根据重做日志中的信息来初始化计数器的内存值
+
+
+
+
+
+
+
+## FOREIGN KEY 约束
+
+**作用**
+
+限定某个表的某个字段的引用完整性
+
+**关键字**
+
+FOREIGN KEY
+
+**主表和从表/父表和子表**
+
+主表（父表）：被引用的表，被参考的表
+
+从表（子表）：引用别人的表，参考别人的表
+
+**特点**
+
+<img src = "img/外键特点.png">
+
+```mysql
+# example 
+
+# 在 CREATE TABLE 时添加
+# 先创建主表
+CREATE TABLE dept1 (
+	dept_id INT,
+    dept_name VARCHAR(15)
+);
+# 再创建从表
+CREATE TABLEL emp1 (
+	emp_id INT PRIMARY KEY AUTO_INCREMENT,
+    emp_name VARCHAR (15),
+    department_id INT,
+    
+    # 表级约束
+    CONSTRAINT fk_emp1_dept_id FOREIGN KEY (department_id) REFERENCES dept1(dept_id)
+);
+# 上述操作错误，是因为主表中的dept_id上没有主键约束或唯一性约束
+# 添加
+ALTER TABLE dept1
+ADD PRIMARY KEY(dept_id);
+# 再创建从表
+CREATE TABLEL emp1 (
+	emp_id INT PRIMARY KEY AUTO_INCREMENT,
+    emp_name VARCHAR (15),
+    department_id INT,
+    
+    # 表级约束
+    CONSTRAINT fk_emp1_dept_id FOREIGN KEY (department_id) REFERENCES dept1(dept_id)
+);
+
+# 查询约束
+SELECT * 
+FROM information_schema.table_constraints
+WHERE table_name = 'emp1';
+```
+
+### 1. 约束等级
+
+<img src = "img/外键约束等级.png">
+
+
+
+### 2. 删除外键约束
+
+```mysql
+# example
+
+# 1. 查看约束名和删除外键约束
+SELECT * FROM information_schema.table_constraints WHERE table_name = '表名称'; # 查看某个表的约束名
+
+ALTER TABLE 从表名 DROP FOREIGN KEY 外键约束名;
+
+
+# 2. 查看索引名和删除索引
+SHOW INDEX FROM 表名称; # 查看某个表的索引名
+
+ALTER TABLE 从表面 DROP INDEX 索引名;
+```
+
+
+
+
+
+
+
+## CHECK 约束
+
+**作用**
+
+检查某个字段的值是否符合xx要求，一般指的是值的范围
+
+**关键字**
+
+CHECK
+
+**说明：MySQL 5.7 不支持**
+
+MySQL 5.7 可以使用check约束，但check约束对数据验证没有任何作用。添加数据时，没有任何错误或警告
+
+但是**MySQL 8.0**中可以使用**check**约束了
+
+```mysql
+# example
+
+CREATE TABLE test10 (
+	id INT,
+    last_name VARCHAR(15),
+    salary DECIMAL(10, 2) CHECK(salary > 2000)
+);
+
+# 在MySQL5.7没反应， 在MySQL8.0会添加失败
+INSERT INTO test1
+VALUES(1, 'Tom', 500);
+```
+
+
+
+
+
+## DEFAULT 约束 *
+
+**作用**
+
+给某个字段/某列指定默认值，一旦设置默认值，在插入数据时，如果此字段没有显示赋值，则赋值为默认值
+
+**关键字**
+
+DEFAULT
+
+```mysql
+# example
+
+CREATE TABLE test11 (
+	id INT,
+    last_name VARCHAR(15),
+    salary DECIMAL(10, 2) DEFAULT 1000000
+);
+
+CREATE TABLE test12 (
+	id INT,
+    last_name VARCHAR(15),
+    salary DECIMAL(10, 2)
+);
+ALTER TABLE test12
+MODIFY salary DECIMAL(12, 2) DEFAULT 2500000;
+
+# 在 ALTER TABLE 删除约束
+ALTER TABLE test12
+MODIFY salary DECIMAL(12, 2);
+```
+
+
+
+
+
+
+
+## 视图
+
+
+
+### 常见的数据库对象
+
+<img src = "img/常见的数据库对象.png">
+
+#### 视图的理解
+
+* 试图是一种**虚拟表**，本身是**不具有数据**的，占用很少的内存空间，它是**SQL**中的一个重要概念
+* **视图建立在已有表的基础上**，视图赖以建立的这些表称为**基表**
+
+<img src = "img/视图的理解.png">
+
+#### 创建视图
+
+* 在**CREATE VIEW**语句中嵌入子查询
+
+```mysql
+CREATE [OR REPLACE]
+[ALGORITHM = {UNDEFINED | MERGE | TEMPTABLE}]
+VIEW 视图名称 [(字段列表)]
+AS 查询语句
+[WITH [CASCADED | LOCAL] CHECK OPTION]
+```
+
+* 精简版
+
+```mysql
+CREATE VIEW 视图名称 [(字段列表)]
+AS 查询语句
+```
+
+```mysql
+# example
+
+CREATE VIEW vu_emp2
+AS
+SELECT employee_id emp_id, last_name lname, salary
+FROM emps
+WHERE salary > 8000;
+# 等价于
+CREATE VIEW vu_emp3(emp_id, lname, monthly_name) # 小括号内字段个数与SELECT中字段个数相同
+AS
+SELECT employee_id, last_name, salary
+FROM emps
+WHERE salary > 8000;
+
+# 针对于多表
+CREATE VIEW vu_emp_dept
+AS
+SELECT e.employee_id, e.department_id, d.department_name
+FROM emps e JOIN depts d
+ON e.`department_id` = d.`department_id`;
+
+# 利用视图对数据进行格式化
+CREATE VIEW vu_emp_dept1
+AS
+SELECT CONCAT(e.last_name, '(', d.department_name, ')')
+FROM emps e JOIN depts d
+ON e.`department_id` = d.`department_id`;
+
+SELECT * FROM vu_emp_dept1;
+
+# 基于视图创建视图
+CREATE VIEW vu_emp4
+AS 
+SELECT employee_id, last_name
+FROM vu_emp1;
+```
+
+#### 查看视图
+
+* 语法一：查看数据库的表对象、视图对象
+
+  ```mysql
+  SHOW TABLES;
+  ```
+
+* 语法二：查看视图的结构
+
+  ```mysql
+  DESCRIBE vu_emp1;
+  ```
+
+* 语法三：查看视图的属性信息
+
+  ```mysql
+  SHOW TABLE STATUS LIKE 'vu_emp1';
+  ```
+
+* 查看使徒的详细定义信息
+
+  ```mysql
+  SHOW CREATE VIEW vu_emp1;
+  ```
+
+
+
+#### 更新视图数据与视图的删除
+
+```mysql
+# example
+
+# 更新视图中的数据
+# 更新视图的数据，会导致表中数据的修改
+UPDATE vu_emp1
+SET salary = 20000
+WHERE employee_id = 101;
+# 同理，更新表中的数据，会导致视图数据的修改
+UPDATE emps
+SET salary = 30000
+WHERE employee_id = 101;
+
+# 删除视图中的数据，会导致基表中的数据的修改
+DELETE FROM vu_emp1
+WHERE employee_id = 101;
+
+# 不能更新视图中的数据的例子
+# 更新失败
+UPDATE vu_emp_sal
+SET avg_sal = 5000
+WHERE department_id = 30;
+```
+
+<img src = "img/不可更新的视图.png">
+
+***虽然可以更新视图数据，但总的来说，视图作为虚拟表，主要用于方便查询，不建议更新视图的数据。对视图数据的更改，都是通过对实际数据表里数据的操作来完成的***
+
+
+
+#### 修改、删除视图
+
+##### 修改视图
+
+* 方式1：使用CREATE **OR REPLACE** VIEW 子句**修改视图**
+
+```mysql
+# example
+
+CREATE OR REPLACE VIEW vu_emp1
+AS
+SELECT employee_id, last_name, salary, email
+FROM emps
+WHERE salary > 10000;
+```
+
+* 方式2：ALTER方式
+
+```mysql
+# example
+
+ALTER VIEW vu_emp1
+AS
+SELECT employee_id, last_name, salary,email, hire_date
+FROM emps;
+```
+
+
+
+##### 删除视图
+
+```mysql
+# example
+
+DROP VIEW vu_emp4;
+
+DROP VIEW IF EXISTS vu_emp2, vu_emp3;
+```
+
+
+
+
+
+
+
+## 存储过程与函数
+
+
+
+### 理解
+
+<img src = "img/存储过程与函数理解1.png">
+
+<img src = "img/存储过程与函数理解2.png">
+
+
+
+### 分类
+
+<img src = "img/存储过程与函数分类.png">
+
+
+
+### 创建存储过程
+
+#### 语法分析
+
+<img src = "img/创建存储过程语法分析.png">
+
+```mysql
+# example
+
+# 创建存储过程select_all_data()，查看 emps 表的所有数据
+# DELIMITER可以修改结束符
+DELIMITER $
+
+CREATE PROCEDURE select_all_data()
+BEGIN
+	SELECT * FROM emps;
+END $
+
+DELIMITER ;
+```
+
+
+
+### 存储过程的调用
+
+```mysql
+# example
+
+CALL select_all_data();
+
+# 创建存储过程 avg_employee_salary()， 返回所有员工的平均工资
+DELIMITER //
+
+CREATE PROCEDURE avg_employee_salary()
+BEGIN
+	SELECT AVG(salary) FROM employees;
+END //
+
+DELIMITER ;
+
+# 调用
+CALL avg_employee_salary();
+
+
+# 带 OUT
+# 创建存储过程 show_min_salary()，查看"emps"表的最低薪资值。并将最低薪资通过 OUT 参数"ms"输出
+DELIMITER //
+
+CREATE PROCEDURE show_min_salary(OUT ms DOUBLE)
+BEGIN
+	select MIN(salary) INTO ms
+	FROM emploees
+END //
+
+DELIMITER ;
+
+# 调用
+CALL show_min_salary(@ms);
+
+# 查看变量值
+SELECT @ms;
+
+
+# 带 IN
+# 创建存储过程show_someone_salary()，查看"emps"表的某个员工的薪资，并用 IN 参数 empname 输入员工姓名
+DELIMITER //
+
+CREATE PROCEDURE show_someone_salary(IN empname VARCHAR(20))
+BEGIN
+	SELECT salary 
+	FROM employees
+	WHERE last_name = empname;
+END //
+
+DELIMITER ;
+
+# 调用
+CALL show_someone_salary('Abel');
+# 另一种调用方式
+SET @empname = 'Abel'; # := 这样明确赋值意义也可以
+CALL show_someone_salary(@empname);
+```
+
+
+
+
+
+### 存储函数的使用
+
+
+
+#### 语法分析
+
+学过的函数：**LENGTH**、**SUBSTR**、**CONCAT**等
+
+语法格式
+
+<img src = "img/存储函数的使用语法分析.png">
+
+```mysql
+# example
+
+# 创建存储函数，名称为email_by_name()，参数定义为空，该函数查询Abel的email，并返回，数据类型为字符串类型
+DELIMITER //
+
+CREATE FUNCTION email_by_name()
+RETURNS VARCHAR(25)
+		DETERMINISTIC
+		CONTAINS SQL
+		READS SQL DATA
+BEGIN
+	RETURN (SELECT email FROM employees WHERE last_name = 'Abel');
+END //
+
+DELIMITER ;
+
+# 调用
+SELECT email_by_name();
+
+
+# 创建存储函数，名称为 email_by_id()，参数传入 emp_id，该函数查询 emp_id 的 email，并返回，数据类型为字符串类型
+
+# 创建函数前执行此语句，保证函数的创建会成功
+SET GLOBAL log_bin_trust_function_creators = 1;
+
+# 声明函数
+DELIMITER //
+
+CREATE FUNCTION email_by_id(emp_id INT)
+RETURNS VARCHAR(25)
+BEGIN
+	RETURN (SELECT email FROM employees WHERE employee_id = emp_id);
+END
+
+DELIMITER ;
+
+# 调用
+SELECT email_by_id(101);
+
+SET @emp_id := 102;
+SELECT email_by_id(@emp_id);
+```
+
+
+
+### 对比存储函数和存储过程
+
+|          | 关键字    | 调用语法       | 返回值          | 应用场景                         |
+| -------- | --------- | -------------- | --------------- | -------------------------------- |
+| 存储过程 | PROCEDURE | CALL存储过程() | 理解为有0或多个 | 一般用于更新                     |
+| 存储函数 | FUNCTION  | SELECT函数()   | 只能是一个      | 一般用于查询结果为一个值并返回时 |
+
+此外，**存储函数可以放在查询语句中使用，存储过程不行**。反之，存储过程的功能更加强大，包括能够执行对表的操作（比如创建表，删除表）和事务操作，这些功能是存储函数不具备的。
+
+
+
+
+
+### 存储过程和函数的查看、修改、删除
+
+#### 查看
+
+1. 使用**SHOW CREATE**语句查看存储过程和函数的创建信息
+
+```mysql
+SHOW CREATE {PROCEDURE | FUNCTION} 存储过程名或函数名
+```
+
+```mysql
+# example
+SHOW CREATE FUNCTION test_db.CountProc \G
+```
+
+
+
+2. 使用**SHOW STATUS**语句查看存储过程和函数的状态信息
+
+```mysql
+SHOW {PROCEDURE | FUNCTION} STATUS [LIKE 'pattern']
+```
+
+这个语句返回子程序的特征，如数据库、名字、类型、创建者以及创建和修改日期
+
+
+
+3. 从**information_schema.Routines**表中查看存储过程和函数的信息
+
+**MySQL**中存储过程和函数的信息存储在**information_schema**数据库下的**Routines**表中
+
+```mysql
+SELECT * 
+FROM information_schema.Routines
+WHERE ROUTINE_NAME = '存储过程或函数的名' [AND ROUTINE_TYPE = {'PPROCEDURE|FUNCTION'}]
+```
+
+
+
+
+
+#### 修改
+
+修改存储过程或函数，不影响存储过程或函数功能，只是修改相关特性。使用**ALTER**语句实现
+
+```mysql
+ALTER {PROCEDURE | FUNCTION} 存储过程或函数的名 [characteristic ...]
+```
+
+其中，**characteristic**指定存储过程或函数的特性，其取值信息与创建存储过程、函数时的取值信息略有不同
+
+```mysql
+{CONTAINS SQL | NO SQL | READS SQL DATA | MODIFY SQL DATA}
+| SQL SECURITY {DEFINER | INVOKER}
+| COMMIT 'string'
+```
+
+
+
+
+
+#### 删除
+
+删除存储过程和函数，可以使用**DROP**语句，其语法结构如下
+
+```mysql
+DROP {PROCEDURE | FUNCTION} [IF EXISTS] 存储过程或函数的名
+```
+
+
+
+
+
+
+
+## 变量、流程控制与游标
+
+
+
+### 变量
+
+<img src = "img/变量.png">
+
+
+
+### 系统变量
+
+**系统变量分类**
+
+<img src = "img/系统变量分类.png">
+
+**查看系统变量**
+
+* 查看所有或部分系统变量
+
+<img src = "img/查看系统变量.png">
+
+* 查看指定系统变量
+
+<img src = "img/查看指定系统变量.png">
+
+* 修改系统变量的值
+
+<img src = "img/修改系统变量的值1.png">
+
+<img src = "img/修改系统变量的值2.png">
+
+
+
+### 用户变量
+
+#### 用户变量分类
+
+<img src = "img/用户变量分类.png">
+
+#### 会话用户变量
+
+<img src = "img/会话用户变量.png">
+
+#### 局部变量
+
+<img src = "img/局部变量.png">
+
+<img src = "img/局部变量2.png">
+
+
+
+### 定义条件与处理程序
+
+<img src = "img/定义条件与处理程序.png">
+
+
+
+#### 定义条件
+
+<img src = "img/定义条件.png">
+
+
+
+#### 定义处理程序
+
+<img src = "img/定义处理程序.png">
+
+
+
+### 流程控制
+
+<img src = "img/流程控制.png">
+
+#### 分支结构之IF
+
+* IF语句的语法结构是
+
+```mysql
+IF 表达式 THEN 操作1
+[ELSEIF 表达式2 THEN 操作2] ...
+[ELSE 操作N]
+END IF
+```
+
+```mysql
+# example
+
+DELIMITER //
+CREATE PROCEDURE test_if()
+BEGIN
+	# 声明局部变量
+	DECLARE stu_name VARCHAR(15);
+	
+	IF stu_name IS NULL;
+		THEN SELECT 'stu_name is null';
+	END IF;
+END //
+DELIMITER ;
+
+# 调用
+CALL test_if();
+```
+
+
+
+#### CASE 语句的语法结构
+
+1
+
+```mysql
+# 情况一：类似于switch
+CASE 表达式
+WHEN 值1 THEN 结果1或语句1（如果是语句，需要加分号）
+WHEN 值2	THEN 结果2或语句2（如果是语句，需要加分号）
+...
+ELSE 结果n或语句n（如果是语句，需要加分号）
+END [CASE] （如果是放在begin end中需要加上CASE，如果放在SELECT后面不需要）
+```
+
+2
+
+```mysql
+# 情况二：类似于多重if
+CASE
+WHEN 条件1 THEN 结果1或语句1（如果是语句，需要加分号）
+WHEN 条件2	THEN 结果2或语句2（如果是语句，需要加分号）
+...
+ELSE 结果n或语句n（如果是语句，需要加分号）
+END [CASE] （如果是放在begin end中需要加上CASE，如果放在SELECT后面不需要）
+```
+
+```mysql
+# example
+
+DELIMITER //
+CREATE PROCEDURE test_case()
+BEGIN
+	# 演示1：case ... when .. then ..
+	DECLARE var INT DEFAULT 2;
+	
+	CASE var
+		WHEN 1 THEN SELECT 'var = 1';
+		WHEN 2 THEN SELECT 'var = 2';
+		WHEN 3 THEN SELECT 'var = 3';
+		ELSE SELECT 'other value';
+	END CASE;
+END //
+
+DELIMITER ;
+```
+
+
+
+#### 循环结构之LOOP
+
+<img src = "img/循环结构之LOOP.png">
+
+
+
+#### 循环结构之WHILE
+
+<img src = "img/循环结构之WHILE.png">
+
+
+
+#### 循环结构之REPEAT
+
+<img src = "img/循环结构之REPEAT.png">
+
+**对比三种循环结构**
+
+<img src = "img/对比三种循环结构.png">
+
+
+
+#### 跳转语句之LEAVE语句
+
+<img src = "img/跳转语句之LEAVE语句.png">
+
+
+
+#### 跳转语句之ITERATE语句
+
+<img src = "img/跳转语句之ITERATE语句.png">
+
+
+
+
+
+
+
+### 游标
+
+#### 使用游标步骤
+
+<img src = "img/使用游标步骤一.png">
+
+<img src = "img/使用游标步骤二.png">
+
+<img src = "img/使用游标步骤三.png">
+
+<img src = "img/使用游标步骤三.2.png">
+
+<img src = "img/使用游标步骤四.png">
+
+
+
+
+
+
+
+### 触发器
+
+当对数据表中的数据执行插入、更新和删除操作，需要自动执行一些数据库逻辑时，可以使用触发器来实现
+
+
+
+#### 触发器的创建
+
+<img src = "img/创建触发器.png">
+
+<img src = "img/创建触发器说明.png">
+
+<img src = "img/创建触发器举例.png">
+
+#### 查看、删除触发器
+
+**查看触发器**
+
+<img src = "img/查看触发器.png">
+
+**删除触发器**
+
+```mysql
+#example 
+DROP TRIGGER IF EXISTS after_insert_test_tri;
+```
+
