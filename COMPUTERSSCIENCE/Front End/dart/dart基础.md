@@ -390,6 +390,67 @@ not hunger 1
 
 
 
+# flutter
+
+
+
+## 对于国内项目前置
+
+对于国内**会有文件加载失败所导致，因此需要更换 gradle 文件中的镜像路径** 。
+
+**1. 依次展开项目目录：【android】→【build.gradle】文件**
+
+**2. 打开 build.gradle 文件进行编辑，请直接移步到我写注释的地方，从而对照你的文件进行更改。**
+
+```dart
+buildscript {
+    ext.kotlin_version = '1.7.10'
+    repositories {
+        // 注释掉这两货
+        // google()
+        // mavenCentral()
+        // 用下面的路径：
+        maven { url 'https://maven.aliyun.com/repository/google' }//google
+        maven { url 'https://maven.aliyun.com/repository/central' }//central
+        maven { url 'https://maven.aliyun.com/repository/public' }//jcenter//public
+        maven { url 'https://maven.aliyun.com/repository/gradle-plugin'}//gradle-plugin
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.3.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+allprojects {
+    repositories {
+        // 一样的将这两货注释掉
+        // google()
+        // mavenCentral()
+        // 用下面的路径：
+        maven { url 'https://maven.aliyun.com/repository/google' }//google
+        maven { url 'https://maven.aliyun.com/repository/central' }//central
+        maven { url 'https://maven.aliyun.com/repository/public' }//jcenter//public
+        maven { url 'https://maven.aliyun.com/repository/gradle-plugin'}//gradle-plugin
+    }
+}
+
+rootProject.buildDir = '../build'
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprojects {
+    project.evaluationDependsOn(':app')
+}
+
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
+}
+
+```
+
+
+
 ## widgets(flutter)
 
 

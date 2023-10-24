@@ -473,7 +473,21 @@ $(patsubst <pattern>, <replacement>, <text>)
 
   **until** （跳出循环）
 
+### GDB 多进程调试
 
+使用**GDB**调试的时候，**GDB**默认只能跟踪一个进程，可以在**fork**函数调用之前，通过指令设置**GDB**调试工具跟踪父进程或者是跟踪子进程，默认跟踪父进程
+
+设置调试父进程或者子进程：**set follow-fork-mode [parent (默认) | child]**
+
+设置调试模式：**set detach-on-fork [ on | off ]**
+
+默认为**on**，表示调试当前进程的时候，其它的进程继续运行，如果为**off**，调试当前进程的时候，其它进程被**GDB**挂起
+
+查看调试的进程：**info inferiors**
+
+切换当前调试的进程：**inferior id**
+
+使进程脱离**GDB**调试：**detach inferiors id**
 
 
 
