@@ -195,7 +195,7 @@ CPU想内存保存数据的方式有两种，意味着CPU解析数据的方式�
 
 
 
-## 3. 函数参数分析
+## 3. 基础函数参数分析
 
 
 
@@ -330,6 +330,68 @@ int socket(int domain, int type, int protocol)
 数据传输方式相同，但协议不同。此时需要通过第三个参数具体指定协议信息
 
 常用的协议有，IPPROTO_TCP、IPPTOTO_UDP、IPPROTO_SCTP、IPPROTO_TIPC等，它们分别对应TCP传输协议、UDP传输协议、STCP传输协议、TIPC传输协议
+
+
+
+#### 3.2.2 套接字多种可选项
+
+<img src = "image/setsock.png">
+
+##### getsockopt
+
+`<sys/socket.h>`
+
+```c++
+int getsockopt(int sock, int level, int optname, void *optval, socklen_t *optlen)
+    // 成功时返回0，失败时返回-1
+```
+
+* sock：用于查看选项套接字文件描述符
+* level：要查看的可选项的协议层
+* optname：要查看的可选项名
+* optval：保存查看结果的缓冲地址值
+* optlen：向第四个参数 optval 传递的缓冲大小。调用函数后，该变量中保存通过第四个参数返回的可选项信息的字节数
+
+##### setsockopt
+
+`<sys/socket.h>`
+
+```c++
+int setsockopt(int sock, int level, int optname, const void * optval, socklen_t optlen)
+    // 成功时返回0， 失败时返回-1
+```
+
+* sock：用于更改可选项的套接字文件描述符
+* level：要更改的可选项协议层
+* optname：要更改的可选项名
+* optval：保存要更改的选项信息的缓冲地址值
+* optlen：向第四个参数optval传递的可选项信息的字节数
+
+##### SO_SNDBUF & SO_RCVBUF
+
+SO_RCVBUF是输入缓冲大小相关可选项，SO_SNDBUF是输出缓冲大小相关可选项。用这2个可选项既可以读取当前**I/O**缓冲大小，也可以进行更改
+
+##### SO_REUSEADDR
+
+* Time-wait 状态
+
+先断开连接的套接字必然会经过**Time-wait**过程。但无需考虑客户端**Time-wait**状态。因为客户端套接字的端口号是任意指定的。与服务器端不同，客户端每次运行程序时都会动态分配端口号，因此无需过多关注**Time-wait**状态
+
+* 更改**SO_REUSEADDR**的状态
+
+**SO_REUSEADDR**的默认值为0（假），这就意味着无法分配**Time-wait**状态下的套接字端口。因此需要将这个值改为1（真）。
+
+```c++
+// example
+
+optlen = sizeof option;
+option = TRUE;
+setsockopt(serv_sock, SOL_SOCKET, SO_REUSERADDR, (void *) &option, optlen);
+```
+
+
+
+
 
 
 
@@ -541,6 +603,53 @@ UDP套接字传输的数据包又称数据报，实际上数据报也属于数�
 
 
 
+### 3.8 利用域名获取 IP 地址
+
+`<netdb.h>`
+
+```c++
+struct hostent * gethostbyname(const char * hostname);
+	// 成功时返回 hostent 结构体地址，失败时返回 NULL 指针
+```
+
+其中`hostent`结构体定义如下
+
+```c++
+struct hostent
+{
+    char * h_name;		// official name
+    char ** h_aliases;	// alias list
+    int h_addrtype;		// host address type
+    int h_length;		// address length
+    char ** h_addr_list;// address list
+}
+```
+
+* h_name：该变量中存有官方域名
+* h_aliases：可以通过多个域名访问同一主页
+* h_addrtype：gethostbyname函数不仅支持IPv4，还支持IPv6。此变量获取保存在h_addr_list的IP地址的地址族信息。若是IPv4，则此变量存有AF_INET
+* h_length：保存IP地址长度。若是IPv4地址，因为是4个字节，则保存4；IPv6时，因为是16个字节，故保存6
+* h_addr_list：通过此变量以整数形式保存域名对应的IP地址
+
+
+
+### 3.9 利用 IP 地址获取域名
+
+`<netdb.h>`
+
+```c++
+struct hostent * gethostbyaddr(const char * addr, socklen_t len, int family);
+	// 成功时返回 hostent 结构体变量地址值，失败时返回 NULL 指针
+```
+
+* addr：含有 IP 地址信息的 in_addr 结构体指针
+* len：像第一个参数传递的地址信息的字节数，IPv4时为4，IPv6时为16
+* family：传递地址族信息，IPv4时为AF_INET，IPv6时为AF_INET6
+
+
+
+
+
 
 
 ## 4. 优雅地断开套接字连接
@@ -575,3 +684,6 @@ int shutdown(int sock, int howto)
   * SHUT_RD：断开输入流
   * SHUT_WR：断开输出流
   * SHUT_RDWR：同时断开I/O流
+
+
+
