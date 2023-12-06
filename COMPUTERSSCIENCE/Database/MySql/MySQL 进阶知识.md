@@ -274,5 +274,49 @@ show engines;
 
 ### 缺点
 
+<img src = "img/索引缺点.png">
 
+
+
+
+
+
+
+## InnoDB中索引的推演
+
+### 索引之前的查找
+
+```mysql
+SELECT [列名列表] FROM 表名 WHERE 列名 = xxx;
+```
+
+### 在一个页中的查找
+
+<img src = "img/在一个页中的查找.png">
+
+### 在很多页中查找
+
+<img src = "img/在很多页中查找.png">
+
+### 设计索引
+
+<img src = "img/设计索引.png">
+
+<img src = "img/设计索引2.png">
+
+<img src = "img/设计索引3.png">
+
+#### 一个简单的索引设计方案
+
+<img src = "img/一个简单的索引设计方案.png">
+
+<img src = "img/一个简单的索引设计方案2.png">
+
+<img src = "img/一个简单的索引设计3.png">
+
+<img src = "img/一个简单的索引设计4.png">
+
+<img src = "img/一个简单的索引设计5.png">
+
+<img src="img/一个简单的索引设计6.png">
 
