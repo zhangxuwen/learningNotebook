@@ -267,7 +267,162 @@ func main() {
 
 ```go
 r.GET("/test", func(c *gin.Context) {
-    c.Readirect(http.StatusMovedPermanently, "http://www.baidu.com/")
+    c.Readirect(http.StatusMovedPermanently, "https://www.baidu.com/")
 })
 ```
 
+### 路由重定向
+
+```go
+r.GET("/test", func(c *gin.Context) {
+    // 指定重定向的URL
+    c.Request.URL.Path = "/test2"
+    r.HandleContext(c)
+})
+r.GET("/test2", func(c *gin.Context) {
+    c.JSON(http.StatusOK, gin.H{
+        "hello": "world",
+    })
+})
+```
+
+
+
+## Gin路由
+
+### 普通路由
+
+```go
+r.GET("/index", func(c *gin.Context) {...})
+r.GET("/login", func(c *gin.Context) {...})
+r.POST("/login", func(c *gin.Context) {...})
+```
+
+此外，还有一个可以匹配所有请求方法的**Any**方法
+
+```go
+r.Any("/test", func(c *gin.Context) {...})
+```
+
+为没有配置处理函数的路由添加处理程序，默认情况下它返回**404**代码，下面的代码没有匹配到路由的请求都返回**view/404.html**
+
+```go
+r.NoRoute(func(c *gin.Context) {
+    c.HTML(http.StatusNotFound, "view/404.html", nil)
+})
+```
+
+### 路由组
+
+```go
+// example
+
+func main() {
+    r := gin.Default()
+    userGroup := r.Group("/user")
+    {
+        userGroup.GET("/index", func(c *gin.Context) {...})
+        userGroup.GET("/login", func(c *gin.Context) {...})
+        userGroup.POST("/login", func(c *gin.Context) {...})
+    }
+    shopGroup := r.Group("/shop")
+    {
+        shopGroup.GET("/index", func(c *gin.Context) {...})
+        shopGroup.GET("/cart", func(c *gin.Context) {...})
+        shopGroup.POST("/checkout", func(c *gin.Context) {...})
+    }
+    r.Run()
+}
+```
+
+
+
+## Gin中间件
+
+### 定义中间件
+
+Gin中的中间件必须是一个**gin.HandlerFunc**类型
+
+```go
+// example
+
+func StatCost() gin.HandlerFunc{
+    return func(c *gin.Context){
+        start := time.Now()
+        c.Set("name", "hh") // 可以通过c.Set在请求上下文中设置值，后续的处理函数能够取到该值
+        // 调用该请求的剩余处理程序
+        c.Next()
+        // 不调用该请求的剩余处理程序
+        // c.Abort() // 阻止调用后续的处理函数
+        // 计算耗时
+        cost := time.Since(start)
+        log.Println(cost)
+    }
+}
+```
+
+### 注册中间件
+
+在Gin框架中可以给每个路由添加任意数量的中间件
+
+#### 为全局路由注册
+
+```go
+// example
+
+func main() {
+    // 新建一个没有任何默认中间件的路由
+    r := gin.New()
+    // 注册一个全局中间件
+    r.Use(StatCost())
+    
+    r.GET("/test", func(c *gin.Context) {
+        name := c.MustGet("name").(string) // 从上下文取值
+        log.Println(name)
+        c.JSON(http.StatusOK, gin.H{
+            "message": "Hello world",
+        })
+    })
+    r.Run()
+}
+```
+
+#### 为某个路由单独注册
+
+```go
+// example
+
+// 给/test2路由单独注册中间件（可注册多个）
+r.GET("/test2", StatCost(), func(c *gin.Context) {
+    name := c.MustGet("name").(string) // 从上下文取值
+    log.Println(name)
+    c.JSON(http.StatusOK, gin.H{
+        "message": "Hello world"
+    })
+})
+```
+
+#### 为路由组注册中间件
+
+* 写法一
+
+  ```go
+  shopGroup := r.Group("/shop", StatCost()) 
+  {
+      shopGroup.GET("/index", func(c *gin.Context) {...})
+      ...
+  }
+  ```
+
+* 写法二
+
+  ```go
+  shopGroup := r.Group("/shop")
+  shopGroup.Use(StatCost())
+  {
+      shopGroup.GET("/index", func(c *gin.Context) {...})
+      ...
+  }
+  ```
+
+  
