@@ -320,3 +320,48 @@ SELECT [列名列表] FROM 表名 WHERE 列名 = xxx;
 
 <img src="img/一个简单的索引设计6.png">
 
+#### InnoDB中的索引方案
+
+<img src="img/迭代一次.png">
+
+<img src="img/迭代一次2.png">
+
+<img src="img/迭代一次3.png">
+
+<img src="img/迭代两次.png">
+
+<img src="img/迭代两次2.png">
+
+<img src="img/迭代三次.png">
+
+<img src="img/迭代三次2.png">
+
+<img src="img/迭代三次3.png">
+
+<img src="img/b+树.png">
+
+<img src="img/b+树2.png">
+
+### 常见索引概念
+
+索引按照物理实现方式，索引可以分为2种：聚簇（聚集）和非聚簇（非聚集）索引。我们也把非聚集索引成为二级索引或者辅助索引
+
+#### 聚簇索引
+
+<img src="img/聚簇索引.png">
+
+<img src="img/聚簇索引2.png">
+
+<img src="img/聚簇索引2.png">
+
+<img src="img/聚簇索引3.png">
+
+<img src="img/聚簇索引4.png">
+
+<img src="img/聚簇索引5.png">
+
+#### 二级索引（辅助索引、非聚簇索引）
+
+<img src="img/二级索引.png">
+
+<img src="img/二级索引2.png">
