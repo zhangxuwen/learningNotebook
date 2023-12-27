@@ -365,3 +365,61 @@ SELECT [列名列表] FROM 表名 WHERE 列名 = xxx;
 <img src="img/二级索引.png">
 
 <img src="img/二级索引2.png">
+
+<img src="img/二级索引3.png">
+
+<img src="img/二级索引4.png">
+
+<img src="img/二级索引5.png">
+
+#### 联合索引
+
+<img src="img/联合索引.png">
+
+<img src="img/联合索引2.png">
+
+### InnoDB的B+树索引的注意事项
+
+#### 根页面位置万年不变
+
+<img src="img/根页面位置万年不动.png">
+
+#### 内节点中目录项记录的唯一性
+
+<img src="img/内节点中目录项记录的唯一性.png">
+
+<img src="img/内节点中目录项记录的唯一性2.png">
+
+<img src="img/内节点中目录项记录的唯一性3.png">
+
+#### 一个页面最少存储2条记录
+
+<img src="img/一个页面最少存储2条记录.png">
+
+
+
+
+
+
+
+### MyISAM中的索引方案
+
+<img src="img/MyISAM中的索引方案.png">
+
+#### MyISAM索引的原理
+
+<img src="img/MyISAM索引的原理.png">
+
+<img src="img/MyISAM索引的原理2.png">
+
+<img src="img/MyISAM索引的原理3.png">
+
+<img src="img/MyISAM索引的原理4.png">
+
+#### MyISAM与InnoDB对比
+
+<img src="img/MyISAM与InnoDB对比.png">
+
+### 索引的代价
+
+<img src="img/索引的代价.png">
