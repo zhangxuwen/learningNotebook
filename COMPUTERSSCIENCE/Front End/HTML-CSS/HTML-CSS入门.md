@@ -2247,3 +2247,175 @@ a {
 
 写法：在less文件**第一行**添加：**// out：false**
 
+
+
+
+
+
+
+## vw 适配方案
+
+* 相对单位
+* 相对**视口的尺寸**计算结果
+* **vw**：**v**iewport **w**idth
+  * 1vw=**1/100**视口宽度
+* vh：**v**iewport **h**eight
+  * 1vh=**1/100**视口高度
+
+### vw布局
+
+1. 确定设计稿**对应**的vw尺寸（1/100视口宽度）
+   * 查看**设计稿宽度** -> 确定参考**设备宽度**（视口宽度） -> 确定**vw尺寸**（1/100 视口宽度）
+2. vw单位的尺寸 = **px 单位数值 / （1/100视口宽度）**
+
+
+
+
+
+
+
+## 媒体查询
+
+```css
+@media (媒体特性) {
+    选择器 {
+        样式
+    }
+}
+```
+
+媒体特性
+
+* **max-width**：最大宽度
+* **min-width**：最小宽度
+
+提示
+
+* **min-width**（从小到大）
+* **max-width**（从大到小）
+
+### 完整写法（了解）
+
+```css
+@media 关键词 媒体类型 and (媒体特性) { CSS代码 }
+```
+
+关键词 / 逻辑操作符
+
+* and
+* only
+* not
+
+媒体类型是用来**区分设备类型**的，如屏幕设备、打印设备等，其中手机、电脑、平板都属于屏幕设备
+
+| 类型名称   | 值     | 描述         |
+| ---------- | ------ | ------------ |
+| 屏幕       | screen | 带屏幕的设备 |
+| 打印预览   | print  | 打印预览模式 |
+| 阅读器     | speech | 屏幕阅读模式 |
+| 不区分类型 | all    | 默认值       |
+
+媒体特性主要用来描述**媒体类型的具体特征**，如当前屏幕的宽高、分辨率、横屏或竖屏等
+
+| 特性名称           | 熟悉                      | 值                               |
+| ------------------ | ------------------------- | -------------------------------- |
+| 视口的宽和高       | width、height             | 数值                             |
+| **视口最大宽或高** | **max-width**、max-height | 数值                             |
+| 视口最小宽或高     | **min-width**、min-height | 数值                             |
+| 屏幕方向           | orientation               | portrait：竖屏； landscape：横屏 |
+
+#### 外部CSS
+
+```html
+<link rel="stylesheet" media="逻辑符 媒体类型 and (媒体特性)" href="xx.css">
+```
+
+
+
+
+
+
+
+## Bootstrap
+
+Bootstrap是由Twitter公司开发维护的**前端UI框架**。
+
+中文官网：https://www.bootcss.com/
+
+使用步骤
+
+1. 下载：Bootstrap V5中文文档 -> 进入中文文档 -> 下载 -> 下载 Bootstrap 生产文件
+
+2. 使用
+
+   1. 引入 Bootstrap CSS 文件
+
+      ```html
+      <link rel="stylesheet" href="./Bootstrap/css/bootstrap.min.css">
+      ```
+
+   2. 调用类名：**container**：响应式布局版心类
+
+      ```html
+      <div class="container">测试</div>
+      ```
+
+### 栅格系统
+
+栅格化是指讲整个网页的宽度分成**12**等分，每个盒子占用的对应的份数
+
+| Breakpoint        | Class infix | Dimensions |
+| ----------------- | ----------- | ---------- |
+| Extra small       | None        | <576px     |
+| Small             | **sm**      | >=576px    |
+| Medium            | **md**      | >=768px    |
+| Large             | **lg**      | >=992px    |
+| Extra large       | **xl**      | >=1200px   |
+| Extra extra large | **xxl**     | >=1400px   |
+
+|                        | xs         | sm       | md       | lg       | xl       | xxl       |
+| ---------------------- | ---------- | -------- | -------- | -------- | -------- | --------- |
+| **Container**max-width | None(auto) | 540px    | 720px    | 960px    | 1140px   | 1320px    |
+| **Class prefix**       | .col-      | .col-sm- | .col-md- | .col-lg- | .col-xl- | .col-xxl- |
+
+
+
+### 全局样式
+
+#### Button类
+
+* btn：默认样式
+* btn-success：成功
+* btn-warning：警告
+* ...
+* 按钮尺寸：btn-lg / btn-sm
+
+#### 表格类
+
+* table：默认样式
+* table-striped：隔行变色
+* table-success：表格颜色
+* ...
+
+
+
+### 组件
+
+1. 引入样式表
+2. 引入js文件
+3. 复制结构，修改内容
+
+
+
+### 字体图标
+
+下载：
+
+导航 / Extend：图标库 -> 安装 -> 下载安装包 -> bootstrap-icons-1.X.X.zip
+
+使用：
+
+1. 复制**fonts文件夹**到项目目录
+2. 网页引入**bootstrap-icons.css**文件
+3. 调用**CSS类名**（图标对应的类名）
+

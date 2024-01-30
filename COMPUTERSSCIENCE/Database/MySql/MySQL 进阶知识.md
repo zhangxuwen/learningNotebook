@@ -423,3 +423,209 @@ SELECT [列名列表] FROM 表名 WHERE 列名 = xxx;
 ### 索引的代价
 
 <img src="img/索引的代价.png">
+
+
+
+
+
+
+
+## MySQL数据结构选择的合理性
+
+<img src="img/MySQL数据结构选择的合理性.png">
+
+### 全表遍历
+
+略
+
+### Hash结构
+
+<img src="img/Hash结构.png">
+
+<img src="img/Hash结构2.png">
+
+<img src="img/Hash结构3.png">
+
+<img src="img/Hash结构4.png">
+
+<img src="img/Hash结构6.png">
+
+<img src="img/Hash结构7.png">
+
+<img src="img/Hash结构8.png">
+
+<img src="img/Hash结构9.png">
+
+### 二叉搜索树
+
+<img src="img/二叉搜索树.png">
+
+<img src="img/二叉搜索树2.png">
+
+<img src="img/二叉搜索树3.png">
+
+
+
+### AVL树
+
+<img src="img/AVL树.png">
+
+<img src="img/AVL树2.png">
+
+
+
+### B-Tree
+
+<img src="img/B-Tree.png">
+
+<img src="img/B-Tree2.png">
+
+<img src="img/B-Tree3.png">
+
+
+
+### B+Tree
+
+<img src="img/B+Tree.png">
+
+。。。略
+
+
+
+### R树
+
+<img src="img/R树.png">
+
+<img src="img/MySQL数据结构选择的合理性小结.png">
+
+
+
+
+
+
+
+## InnoDB数据存储结构
+
+### 数据库的存储结构：页
+
+<img src="img/数据库的存储结构：页.png">
+
+#### 磁盘与内存交互基本单位：页
+
+<img src="img/磁盘与内存交互基本单位：页.png">
+
+#### 页结构概述
+
+<img src="img/页结构概述.png">
+
+#### 页的大小
+
+<img src="img/页的大小.png">
+
+#### 页的上层结构
+
+<img src="img/页的上层结构.png">
+
+<img src="img/页的上层结构2.png">
+
+
+
+### 页的内部结构
+
+<img src="img/页的内部结构.png">
+
+<img src="img/页的内部结构2.png">
+
+
+
+#### 第1部分：File Header（文件头部）和File Trailer（文件尾部）
+
+##### File Header
+
+<img src="img/文件头部.png">
+
+
+
+<img src="img/FIL_PAGE_OFFSET.png">
+
+
+
+<img src="img/FIL_PAGE_TYPE.png">
+
+
+
+<img src="img/FIL_PAGE_PREV和FIL_PAGE_NEXT.png">
+
+
+
+<img src="img/FIL_PAGE_SPACE_OR_CHKSUM.png">
+
+<img src="img/FIL_PAGE_SPACE_OR_CHKSUM2.png">
+
+
+
+<img src="img/FIL_PAGE_LSN.png">
+
+
+
+##### File Trailer
+
+<img src="img/File Trailer.png">
+
+
+
+
+
+#### 第2部分 记录部分
+
+<img src="img/记录部分.png">
+
+
+
+<img src="img/Free Space.png">
+
+
+
+<img src="img/User Records.png">
+
+
+
+##### 记录头信息
+
+<img src="img/记录头信息.png">
+
+<img src="img/记录头信息2.png">
+
+<img src="img/记录头信息3.png">
+
+<img src="img/记录头信息4.png">
+
+<img src="img/记录头信息5.png">
+
+<img src="img/记录头信息6.png">
+
+<img src="img/记录头信息7.png">
+
+<img src="img/记录头信息8.png">
+
+<img src="img/记录头信息9.png">
+
+<img src="img/记录头信息11.png">
+
+<img src="img/记录头信息12.png">
+
+<img src="img/记录头信息13.png">
+
+<img src="img/记录头信息14.png">
+
+<img src="img/记录头信息15.png">
+
+<img src="img/记录头信息16.png">
+
+
+
+##### Infimum + Supremum
+
+<img src="img/Infimum + Supremum.png">
+
+<img src="img/记录头信息10.png">
