@@ -55,7 +55,10 @@ CS --> BD(Backend)
 CS --> FD(Front end)
 FD --> dart
 FD --> HTML-CSS
+HTML-CSS --> HTML-CSS_base
 FD --> JavaScript
+JavaScript --> JavaScript_base
+JavaScript --> JavaScript_more
 
 
 CS --> OS(Operator System)
@@ -69,6 +72,8 @@ cpp --> c++基础杂项知识(cpp_base_miscellaneous)
 
 CS --> DB(Database)
 DB --> MySQL
+MySQL --> MySQL_base
+MySQL --> MySQL_more
 DB --> paper
 DB --> Redis
 
