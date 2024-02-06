@@ -891,3 +891,523 @@ console.log(price.toFixed(2)) // 12.35
   * 构造函数体现了面向对象的封装特性
   * 构造函数实例创建的对象彼此独立、互不影响
 
+**前面学过的构造函数方法很好用，但是存在浪费内存的问题（因为function（）指向的不是同一个冗余了）**
+
+
+
+
+
+
+
+# 原型
+
+* 构造函数通过原型分配的函数是所有对象所**共享的**
+* JavaScript规定，**每一个构造函数都有一个 prototype 属性**，指向另一个对象，所以也称为原型对象
+* 这个对象可以挂载函数，对象实例化不会多次创建原型上函数，节约内存
+* **可以把那些不变的方法，直接定义在 prototype 对象上，这样所有对象的实例就可以共享这些方法**
+* **构造函数和原型对象中的 this 都指向 实例化的对象**
+
+```javascript
+// example
+
+function Star(uname, age) {
+    this.uname = uname
+    this.age = age
+}
+Star.prototype.sing = function() {
+    console.log('唱歌')
+}
+```
+
+**构造函数和原型对象中的 this 都指向 实例化的对象**
+
+
+
+## constructor 属性
+
+**作用**：该属性**指向**该原型对象的**构造函数**
+
+```javascript
+// example
+
+/*
+function Star() {}
+console.log(Star.prototype) // 有constructor
+Star.prototype = {
+    sing: function () {
+        console.log('唱歌')
+    },
+    dance: function () {
+        console.log('跳舞')
+    },
+}
+console.log(Star.prototype) // 没有constructor
+*/
+
+function Star() {}
+console.log(Star.prototype) // 有constructor
+Star.prototype = {
+    // 重新指回创造这个原型对象的 构造函数
+    constructor: Star,
+    sing: function () {
+        console.log('唱歌')
+    },
+    dance: function () {
+        console.log('跳舞')
+    },
+}
+console.log(Star.prototype) // 有constructor
+```
+
+
+
+## 对象原型
+
+**对象都会有一个属性 __proto__ **指向构造函数的**prototype**原型对象，之所以对象可以使用构造函数 **prototype** 原型对象的属性和方法，就是因为对象有 **__proto__ **原型的存在
+
+注意：
+
+* **__proto__** 是**JS**非标准属性
+* **[[prototype]]** 和 **__proto__** 意义相同
+* 用来表明当前实例对象指向哪个原型对象**prototype**
+* **\__proto__** 对象原型里面也有一个 **constructor** 属性，**指向创建该实例对象的构造函数**
+
+<img src = "image/2.png">
+
+
+
+## 原型继承
+
+继承是面向对象编程的另一个特征，通过继承进一步提升代码封装的程度，**JavaScript**中大多数是借助原型对象实现继承的特性
+
+```javascript
+// example
+
+const Person = {
+    eays: 2,
+    head: 1
+}
+
+function Woman() {
+    
+}
+
+Woman.prototype = Person
+Woman.prototype.constructor = Woman
+const red = new Woman()
+console.log(red)
+console.log(Woman.prototype)
+
+function Man() {
+    
+}
+Man.prototype = Person
+Man.prototype.constructor = Man
+const blue = new Man()
+console.log(blue)
+console.log(Man.prototype)
+```
+
+### 问题
+
+这里男人和女人都同时使用了同一个对象，根据引用类型的特点，他们都指向同一个对象，修改一个都会影响
+
+### 解决                                                                                                                                        
+
+```javascript
+// example
+
+function Person() {
+    this.eyes = 2
+    this.head = 1
+}
+
+function Woman() {
+    
+}
+
+Woman.prototype = new Person()
+Woman.prototype.constructor = Woman
+
+function Man() {
+    
+}
+
+Man.prototype = new Person()
+Man.prototype.constructor = Man
+```
+
+
+
+## 原型链
+
+基于原型对象的继承使得不同构造函数的原型对象关联在一起，并且这种关联的关系是一种链状的结构，将原型对象的链状结构关系称为原型链
+
+### 查找规则
+
+1. 当访问一个对象的属性（包括方法）时，首先查找这个**对象**自身有没有该属性
+2. 如果没有就查找它的原型（也就是 **__proto__** 指向的 **prototype 原型对象**）
+3. 如果还没有就查找原型对象的原型（**Object的原型对象**）
+4. 依此类推一直找到 **Object** 为止（**null**）
+5. **__proto__** 对象原型的意义在于为对象成员查找机制提供一个方向，或者说一条路线
+6. 可以使用 **instanceof** 运算符用于检测构造函数的 **prototype** 属性是否出现在某个实例对象的原型链上
+
+
+
+
+
+
+
+# 深浅拷贝
+
+考虑深浅拷贝问题只针对引用类型
+
+## 浅拷贝
+
+**常见方法**
+
+1. 拷贝对象：**Object.assgin()** / 展开运算符 **{...obj}** 拷贝对象
+2. 拷贝数组：**Array.prototype.concat()** 或者 **[...arr]**
+
+**如果时简单数据类型拷贝值，引用数据类型拷贝的是地址（简单理解：如果是单层对象没问题，如果有多层就有问题）**
+
+
+
+## 深拷贝
+
+拷贝的是对象，不是地址
+
+**常见方法**
+
+1. 通过递归实现深度拷贝
+
+   **函数递归**
+
+   **如果一个函数子啊内部可以调用其本身，那么这个函数就是递归函数**
+
+   * 简单理解：函数内部自己调用自己，这个函数就是递归函数
+   * 递归函数的作用和循环效果类似
+   * 由于递归很容易发生“栈溢出”错误（**stack overflow**），所以**必须加退出条件 return**
+
+2. **lodash / cloneDeep**
+
+   **JS**库**lodash**里面**cloneDeep**内部实现了深拷贝
+
+   ```javascript
+   // example
+   
+   var objects = [{ 'a': 1 }, { 'b': 2 }];
+   var deep = _.cloneDeep(objects);
+   console.log(deep[0] === objects[0]);
+   // => false
+   ```
+
+3. 通过**JSON.stringify()**实现
+
+   ```javascript
+   // example
+   
+   Json.parse(JSON.stringify(obj))
+   ```
+
+
+
+
+
+
+
+# 异常处理
+
+
+
+## throw 抛异常
+
+异常处理是指预估代码执行过程中可能发生的错误，然后最大程度的避免错误的发生导致整个程序无法继续运行
+
+```javascript
+// example
+
+function fn(x, y) {
+    if(!x || !y) {
+        // throw '没有参数传递进来'
+        throw new Error('没有参数传递过来')
+    }
+    return x + y
+}
+concole.log(fn())
+```
+
+
+
+## try / catch 捕获错误信息
+
+可以通过 **try / catch** 捕获错误信息（浏览器提供的错误信息）
+
+```javascript
+// example
+
+function fn() {
+    try {
+        // 可能发送错误的代码 要写到 try
+        const p = document.querySelector('.p')
+        p.style.color = 'red'
+    } catch (err) {
+        // 拦截错误，提示浏览器提供的错误信息，但是不中断程序的执行
+        console.log(err.message)
+        throw new Error('你看看，选择器错误了吧')
+        // 需要加return 中断程序
+        // return
+    }
+    finally {
+        // 不管你程序对不对，一定会执行的代码
+        alert('弹出对话框')
+    }
+}
+fn()
+```
+
+**总结**
+
+1. **try...catch** 用于捕获错误信息
+2. 将预估可能发生错误的代码写在**try**代码段中
+3. 如果**try**代码段中出现错误后，会执行**catch**代码段，并截获错误信息
+4. **finally** 不管是否有错误，都会执行
+
+
+
+## debugger
+
+```javascript
+// example
+
+const arr = [1, 3, 5]
+const newArr = arr.map((item, index) => {
+    debugger
+    console.log(item)
+    console.log(index)
+    return item + 10
+})
+console.log(newArr)
+```
+
+
+
+
+
+
+
+# 处理this
+
+
+
+## this指向 - 普通函数
+
+普通函数的调用方式决定了**this**的值，即【谁调用**this**的值指向谁】
+
+普通函数没有明确调用者时**this**值为**window**，严格模式下没有调用者时**this**的值为**undefined**
+
+
+
+## this指向 - 箭头函数
+
+箭头函数中的**this**与普通函数完全不同，也不受调用方式的影响，事实上**箭头函数中并不存在this**
+
+1. 箭头函数会默认帮我们绑定外层**this**的值，所以在箭头函数中**this**的值和外层的**this**是一样的
+2. 箭头函数中的**this**应用的就是最近作用域中的**this**
+3. 向外层作用域中，一层一层查找**this**，直到有**this**的定义
+
+**注意情况**
+
+在开发中【使用箭头函数前需要考虑函数中**this**的值】，事件回调函数使用箭头函数时，**this**为全局的**window**
+
+因此**DOM**事件回调函数**如果里面需要** **DOM**对象的**this**，则不推荐使用**箭头函数**
+
+
+
+## 总结
+
+1. 函数内不存在**this**，沿用上一级的
+2. 不适用
+   * 构造函数，原型函数，**DOM**事件函数等
+3. 适用
+   * 需要使用上层**this**的地方
+
+
+
+
+
+## 改变this
+
+**JavaScript** 中还允许指定函数中**this**的指向，有3个方法可以动态指定普通函数中**this**的指向
+
+* **call()**
+
+  使用**call**方法调用函数，同时指定被调用函数中**this**的值
+
+  * **语法**
+
+    ```javascript
+    fun.call(thisArg, arg1, arg2, ...)
+    ```
+
+    * **thisArg**：在**fun**函数运行时指定的**this**值
+    * **arg1，arg2**：传递的其他参数
+    * 返回值就是函数的返回值，因为它就是调用函数
+
+* **apply()**
+
+  使用**apply**方法调用函数，同时指定被调用函数中**this**的值
+
+  * **语法**
+
+    ```javascript
+    fun.apply(thisArg, [argsArray])
+    ```
+
+    * **thisArg**：在**fun**函数运行时指定的**this**值
+    * **argsArray**：传递的值，必须包含在**数组**里面
+    * 返回值就是函数的返回值，因为它就是调用函数
+    * 因此**apply**主要跟数组有关系，比如使用**Math.max()**求数组的最大值
+
+* **bind()**
+
+  * **bind()**方法不会调用函数，但是能改变函数内部**this**指向
+
+  * 语法
+
+    ```javascript
+    fun.bind(thisArg, arg1, arg2, ...)
+    ```
+
+    * **thisArg**：在**fun**函数运行时指定的**this**值
+    * **arg1，arg2**：传递的其他参数
+    * 返回由指定的**this**值和初始化参数改造的**原函数拷贝（新函数）**
+    * 因此当只想改变**this**指向，并且不想调用这个函数的时候，可以使用**bind**，比如改变定时器内部的**this**指向
+
+### 主要应用场景
+
+* **call**调用函数并且可以传递参数
+* **apply**经常跟数组有关系，比如借助于数学对象实现数组最大值最小值
+* **bind**不用调用函数，但是还想改变**this**指向，比如改变定时器内部的**this**指向
+
+
+
+
+
+
+
+# 防抖
+
+* **防抖**：单位时间内，频繁触发事件，**只执行最后一次**
+
+实现方式
+
+* **lodash**提供的防抖来处理
+
+  ```html
+  <!-- example -->
+  <script src="./js/lodash.min.js"></script>
+  <script>
+      const box = document.querySelector('.box')
+      let i = 1
+      function mouseMove() {
+          box.innerHTML = i ++
+      }
+      
+      box.addEventListener('mousemove', _.debounce(mouseMove, 500))
+  </script>
+  ```
+
+* **手写**一个防抖函数来处理
+
+  ```javascript
+  // example
+  
+  const box = document.querySelector('.box')
+  let i = 1
+  function mouseMove() {
+      box.innerHTML = i ++
+  }
+  
+  function debounce(fn, t) {
+      let timer
+      // return 返回一个匿名函数
+      return function() {
+          if(timer) clearTimeout(timer)
+          timer = setTimeout(function(){
+              fn() // 加小括号调用 fn 函数
+          }, t)
+      }
+  }
+  
+  box.addEventListener('mousemove', debounce(mouseMove, 500))
+  ```
+
+
+
+
+
+
+
+# 节流 - throttle
+
+* **节流**：单位时间内，频繁触发事件，**只执行一次**
+
+**实现方式**
+
+1. **lodash**提供的**节流函数**来处理
+
+   ```javascript
+   _.throttle(func, [wait=0], [options=])
+   ```
+
+   ```javascript
+   // example
+   
+   // 利用lodash库实现节流 - 500毫秒之后采用 +1
+   box.addEventListener('mousemove', _.throttle(mouseMove, 500))
+   ```
+
+2. **手写**一个节流函数来处理
+
+   ```javascript
+   // example
+   
+   function throttle(fn, t) {
+       let timer = null
+       return function() {
+           if(!timer) {
+               timer = setTimeout(function() {
+                   fn()
+                   // 清空定时器
+                   timer = null
+               }, t)
+           }
+       }
+   }
+   
+   box.addEventListener('mousemove', \ throttle(mouseMove, 500))
+   ```
+
+   ## 案例
+
+   两个事件：
+
+   1. **ontimeupdate** 事件在视频/音频（audio/video）当前的播放位置发送改变时触发
+   2. **onloadeddata** 事件在当前帧的数据加载完成且还没有足够的数据播放视频/音频（audio/video）的下一帧时触发
+
+   ```javascript
+   // example 记录视频播放时间
+   
+   const video = document.querySelector('video')
+   video.ontimeupdate = _.throttle(() => {
+       localStorage.setItem('currentTime', video.currentTime)
+   }, 1000)
+   
+   // 打开页面触发事件，就从本地存储里面取出记录的时间，赋值给 video.currentTime
+   video.onloaddata = () => {
+       video.currentTime = localStorage.getItem('currentTime') || 0
+   }
+   ```
+
+   
