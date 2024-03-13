@@ -59,6 +59,9 @@ HTML-CSS --> HTML-CSS_base
 FD --> JavaScript
 JavaScript --> JavaScript_base
 JavaScript --> JavaScript_more
+JavaScript --> Node.js
+JavaScript --> AJAX
+JavaScript --> Vue
 
 
 CS --> OS(Operator System)
