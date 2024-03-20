@@ -191,8 +191,6 @@
 
    使用场景：一个类名，来回切换
 
-   
-
 2. **数组** -> 数组中所有的类，都会添加到盒子上，本质就是一个**class列表**
 
    ```html
@@ -653,3 +651,559 @@ data () {
 * 组件的数据是**独立**的，无法直接访问其他组件的数据
 * 想用其他组件的数据 -> 组件通信
 
+## 组件关系分类
+
+1. 父子关系
+
+   组件通信解决方案：**props** 和 **$emit**
+
+   ```html
+   <!-- example -->
+   
+   <!-- App.vue -->
+   <template>
+       <div>
+           <Son :title="myTitile"></Son>
+       </div>
+   </template>
+   <script>
+       import Son from './components/Son.vue'
+       export default {
+           data () {
+               return {
+                   myTitle: '父组件'
+               }
+           },
+           components: {
+               Son
+           }
+       }
+   </script>
+   
+   
+   
+   <!-- Son.vue -->
+   <template>
+   	<div>
+           {{ title }}
+       </div>
+   </template>
+   <script>
+       export default {
+           props: ['title']
+       }
+   </script>
+   ```
+
+   ### prop
+
+   定义：**组件上**注册的一些**自定义属性**
+
+   作用：向子组件传递数据
+
+   特点
+
+   * 可以传递**任意数量**的**prop**
+   * 可以传递**任意类型**的**prop**
+
+   #### props 校验
+
+   作用：为组件的**prop**指定**验证要求**，不符合要求，控制台就会有**错误提示** -> 帮助开发者，快速发现错误
+
+   语法
+
+   1. 类型校验
+
+      ```javascript
+      props: {
+          校验的属性名: 类型 // Number String Boolean
+      }
+      ```
+
+   2. 非空校验
+
+   3. 默认值
+
+   4. 自定义校验
+
+   ```vue
+   // example
+   
+   props: {
+   	校验的属性名: {
+   		type: 类型,	// Number String Boolean ...
+   		required: true,	// 是否必填
+   		default: 默认值,	// 默认值
+   		validator (value) {
+   			// 自定义校验逻辑
+   			return 是否通过校验
+   		}
+   	}
+   }
+   ```
+
+   **prop & data**、单向数据流
+
+   共同点：都可以给组件提供数据
+
+   区别
+
+   * **data**的数据是**自己**的 -> 随便改
+   * **prop**的数据是**外部**的 -> 不能直接改，要遵循**单向数据流**
+
+   单向数据流：父级**prop**的数据更新，会向下流动，影响子组件。这个数据流动是单向的
+
+2. 非父子关系
+
+   组件通信解决方案
+
+   1. **provide** 和 **inject**
+
+      作用：**跨层级**共享数据
+
+      * 父组件 **provide** 提供数据
+
+        ```javascript
+        export default {
+            provide () {
+                return {
+                    // 普通类型【非响应式】
+                    color: this.color,
+                    // 复杂类型【响应式】
+                    userInfo: this.userInfo,
+                }
+            }
+        }
+        ```
+
+      * 子/孙组件 **inject** 取值使用
+
+        ```javascript
+        export default {
+            inject: ['color', 'userInfo'],
+            created () {
+                console.log(this.color, this.userInfo)
+            }
+        }
+        ```
+
+   2. **event bus**
+
+      作用：非父子组件之间，进行建议消息传递（复杂场景 -> **Vuex**）
+
+      * 创建一个都能访问到的事件总线（空**Vue**实例） ->  **utils/EventBus.js**
+
+        ```javascript
+        import Vue from 'vue'
+        const Bus = New Vue()
+        export default Bus
+        ```
+
+      * A组件（接收方），监听**Bus实例**的事件
+
+        ```javascript
+        created () {
+            Bus.$on('sendMsg', (msg) => {
+                this.msg = msg
+            })
+        }
+        ```
+
+      * B组件（发送方），触发**Bus实例**的事件
+
+        ```javascript
+        Bus.$emit('sendMsg', '这是一个消息')
+        ```
+
+3. 组件通信通用解决方案
+
+   **Vuex** （适合复杂业务场景）
+
+
+
+
+
+
+
+# v-model 原理
+
+原理：**v-model**本质上是一个**语法糖**。例如应用在输入框上，就是**value**属性和**input**事件的合写
+
+作用：提供数据的双向绑定
+
+1. 数据变，视图跟着变：**value**
+2. 视图变，数据跟着变：**@input**
+
+注意：**$event** 用于在模板中，获取事件的形参
+
+
+
+
+
+
+
+# .sync 修饰符
+
+作用：可以实现**子组件**与**父组件数据**的**双向绑定**，简化代码
+
+特点：**prop**属性名，可以**自定义**，非固定为**value**
+
+场景：封装弹框类的基础组件，**visible**属性，**true**显示 **false**隐藏
+
+本质：就是**:属性名**和**@update:属性名**合写
+
+
+
+
+
+
+
+# ref 和 $refs
+
+作用：利用**ref**和**$refs**可以用于**获取dom元素**或**组件实例**
+
+特点：查找范围 -> 当前组件内（更精确稳定）
+
+1. 获取dom
+
+   * 目标标签 - 添加 **ref** 属性
+
+     ```html
+     <div ref="charRef">渲染图标的容器</div>
+     ```
+
+   * 恰当时机，通过**this.$refs.xxx**，获取目标标签
+
+     ```javascript
+     mounted() {
+         console.log(this.$refs.charRef)
+     }
+     ```
+
+2. 获取组件
+
+   * 目标组件 - 添加 **ref** 属性
+
+     ```html
+     <BaseForm ref="baseForm"></BaseForm>
+     ```
+
+   * 通过 **this.$refs.xxx**，获取目标组件，就可以**调用组件对象里面的方法**
+
+     ```javascript
+     this.$refs.baseForm.组件方法()
+     ```
+
+
+
+
+
+
+
+# Vue异步更新、$nextTick
+
+**$nextTick**：**等DOM更新后**，才会触发执行此方法里的函数体
+
+语法：**this.$nextTick(函数体)**
+
+```javascript
+this.$nextTick(() => {
+    this.$refs.inp.focus()
+})
+```
+
+
+
+
+
+
+
+# 自定义指令
+
+自定义指令：自己定义的指令，可以**封装一些dom操作**，扩展额外功能
+
+* 全局注册 - 语法
+
+  ```javascript
+  Vue.directive('指令名', {
+      "inserted" (el) {
+          // 可以对 el 标签，扩展额外功能
+          el.focus()
+      }
+  })
+  ```
+
+* 局部注册 - 语法
+
+  ```javascript
+  directives: {
+      "指令名": {
+          inserted () {
+              // 可以对 el 标签，扩展额外功能
+              el.focus()
+          }
+      }
+  }
+  ```
+
+
+
+## 自定义指令 - 指令的值
+
+* 语法：在绑定指令是，可以通过“等号”的形式为指令绑定**具体的参数值**
+
+  ```html
+  <div v-color="color"></div>
+  ```
+
+* 通过 **binding.value** 可以拿到指令值，指令值修改会 **触发 update 函数**
+
+  ```javascript
+  directives: {
+      color: {
+          inserted (el, binding) {
+              el.style.color = binding.value
+          },
+          update (el, binding) {
+              el.style.color = binding.value
+          }
+      }
+  }
+  ```
+
+
+
+
+
+# 插槽
+
+作用：让组件内部的一些 **结构** 支持 **自定义**
+
+插槽基本语法
+
+1. 组件内需要定制的结构部分，改用**\<slot>\</slot>**占位
+2. 使用组件时，**\<MyDialog>\</MyDialog>**标签内部，传入结构替换**slot**
+
+
+
+## 后备内容（默认值）
+
+通过插槽完成了内容的定制，传什么显示什么，但是如果不传，则是空白
+
+插槽后备内容：封装组件时，可以为预留的`<slot>`插槽提供**后备内容**（默认内容）
+
+* 语法：在**\<slot>**标签内，放置内容，作为默认显示内容
+
+* 效果
+
+  * 外部使用组件时，不传东西，则**slot**会显示后备内容
+
+    ```html
+    <MyDialog></MyDialog>
+    ```
+
+  * 外部使用组件时，传东西了，则**slot**整体会被换掉
+
+    ```html
+    <MyDialog>我是内容</MyDialog>
+    ```
+
+
+
+## 具名插槽
+
+具名插槽语法
+
+1. 多个**slot**使用**name**属性区分名字
+
+   ```html
+   <!-- example -->
+   <div class="dialog-header">
+       <slot name="head"></slot>
+   </div>
+   <div class="dialog-content">
+       <slot name="content"></slot>
+   </div>
+   <div class="dialog-footer">
+       <slot name="footer"></slot>
+   </div>
+   ```
+
+2. **template**配合**v-slot: 名字**来分发对应标签
+
+   ```html
+   <MyDialog>
+       <template v-slot:head>
+           大标题
+       </template>
+       <template v-slot:content>
+           内容文本
+       </template>
+       <template v-slot:footer>
+           <button>按钮</button>
+       </template>
+   </MyDialog>
+   ```
+
+3. **v-slot:插槽名**可以简写成**#插槽名**
+
+
+
+## 作用域插槽
+
+作用域插槽：定义**slot**插槽的同时，是可以**传值**的。给**插槽**上可以**绑定数据**，将来**使用组件时可以使用**
+
+基本使用步骤
+
+1. 给**slot**标签，以添加属性的方式传值
+
+   ```html
+   <slot :id="item.id" msg="测试文本"></slot>
+   ```
+
+2. 所有添加的属性，都会被收集到一个对象中
+
+   ```json
+   { id: 3, msg: '测试文本'}
+   ```
+
+3. 在**template**中，通过`#插槽名="obj"`接收，默认插槽名为**default**
+
+```html
+<MyTable :list="list">
+	<template #default="obj">
+    	<button @click="del(obj.id)">删除</button>
+    </template>
+</MyTable>
+```
+
+
+
+
+
+
+
+# 单页应用程序
+
+* 单页面应用（SPA）：所用功能在 **一个html页面** 上实现
+
+## Vue中的路由
+
+**路径**和**组件**的**映射**关系
+
+## VueRouter
+
+作用：**修改**地址栏路径时，**切换显示**匹配的**组件**
+
+1. 下载：下载**VueRouter**模块到当前工程
+
+   ```shell
+   yarn add vue-router@3.6.5
+   ```
+
+2. 引入
+
+   ```javascript
+   import VueRouter from 'vue-router'
+   ```
+
+3. 安装注册
+
+   ```javascript
+   Vue.use(VueRouter)
+   ```
+
+4. 创建路由对象
+
+   ```javascript
+   const router = new VueRouter()
+   ```
+
+5. 注入，将路由对象注入到**new Vue**实例中，建立关联
+
+   ```javascript
+   new Vue({
+       render: h => h(App),
+       router
+   }).$mount('#app')
+   ```
+
+2个核心步骤
+
+1. 创建需要的组件（**views**目录），配置路由规则
+
+   ```javascript
+   // example
+   
+   import Find from './views/Find.vue'
+   import My from './views/My.vue'
+   import Friend from './views/Friend.vue'
+   
+   const router = new VueRouter({
+       routes: [
+           { path: '/find', component: Find },
+           { path: '/my', component: My },
+           { path: '/friend', component: Friend },
+       ]
+   })
+   ```
+
+2. 配置导航，配置路由出口（路径匹配的组件显示的位置）
+
+   ```html
+   <div class="footer_wrap">
+       <a href="#/find">发现音乐</a>
+       <a href="#/my">我的音乐</a>
+       <a href="#/friend">朋友</a>
+   </div>
+   <div class="top">
+       <router-view></router-view>
+   </div>
+   ```
+
+
+
+## 组件存放目录问题（组件分类）
+
+组件分类：**.vue**文件分2类：**页面组件** & **复用组件**
+
+分类开来 **更易维护**
+
+* **src/views** 文件夹
+  * **页面组件** - 页面展示 - 配合路由用
+* **src/component** 文件夹
+  * **复用组件** - 展示数据 -常用于复用
+
+
+
+
+
+
+
+# 路由的封装抽离
+
+* 在**src**文件夹下新建**router**文件通过**index.js**文件
+
+  ```javascript
+  // example
+  
+  import Find from './views/Find.vue'
+  import My from './views/My.vue'
+  import Friend from './views/Friend.vue'
+  
+  import Vue from 'vue'
+  import VueRouter from 'vue-router'
+  Vue.use(VueRouter)
+  
+  const router = new VueRouter({
+      routes: [
+          { path: '/find', component: Find },
+          { path: '/my', component: My },
+          { path: '/friend', component: Friend },
+      ]
+  })
+  
+  export default router
+  ```
+
+  
