@@ -699,3 +699,107 @@ SELECT [列名列表] FROM 表名 WHERE 列名 = xxx;
 ##### NULL 值列表
 
 <img src="img/NULL值列表.png">
+
+
+
+
+
+##### 记录真实的数据
+
+<img src="img/记录真实的数据.png">
+
+
+
+#### Dynamic和Compressed行格式
+
+##### 行溢出
+
+<img src="img/行溢出.png">
+
+<img src="img/行溢出2.png">
+
+<img src="img/行溢出4.png">
+
+
+
+#### Redundant行格式
+
+##### 字段长度偏移格式
+
+<img src="img/Redundant行格式.png">
+
+<img src="img/Redundant行格式2.png">
+
+
+
+##### 记录头信息
+
+<img src="img/Redundant行格式3.png">
+
+
+
+
+
+
+
+### 区、段与碎片区
+
+
+
+#### 为什么要有区
+
+<img src="img/为什么要有区.png">
+
+
+
+#### 为什么要有段
+
+<img src="img/为什么要有段.png">
+
+
+
+#### 为什么要有碎片区
+
+<img src="img/为什么要有碎片区.png">
+
+
+
+#### 区的分类
+
+<img src="img/区的分类.png">
+
+
+
+
+
+
+
+### 表空间
+
+<img src="img/表空间.png">
+
+
+
+#### 独立表空间
+
+<img src="img/独立表空间.png">
+
+<img src="img/独立表空间2.png">
+
+
+
+#### 系统表空间
+
+<img src="img/系统表空间.png">
+
+<img src="img/系统表空间2.png">
+
+<img src="img/系统表空间3.png">
+
+<img src="img/系统表空间4.png">
+
+<img src="img/系统表空间5.png">
+
+<img src="img/系统表空间6.png">
+
+<img src="img/系统表空间7.png">

@@ -1206,4 +1206,153 @@ this.$nextTick(() => {
   export default router
   ```
 
+
+
+
+
+
+
+
+# 使用router-link替代a标签
+
+* **能跳转**，配置**to**属性指定路径（**必须**）。本质上还是**a**标签，**to**无需
+
+```html
+<!-- example -->
+<div class="footer_wrap">
+    <router-link to="/find">发现音乐</router-link>
+    <router-link to="/my">我的音乐</router-link>
+    <router-link to="/part">朋友</router-link>
+</div>
+```
+
+* **能高亮**，默认就会提供**高亮类名**，可以直接设置高亮样式
+
+
+
+## 两个类名
+
+* **router-link-active** 模糊匹配（用的多）
+  * ``to="/my"``可以匹配`/my`、`/my/a`、`/my/b` ...
+* **router-link-exact-active** 精确匹配
+  * ``to="/my"``仅可以匹配 `/my`
+
+### 自定义匹配的类名
+
+```javascript
+// example
+
+const router = new VueRouter({
+    routes: [...],
+   	linkActiveClass: "类名1",
+    linkExactActiveClass: "类名2"
+})
+```
+
+
+
+## 跳转传参
+
+目标：在跳转路由时，进行传值
+
+* 查询参数传参
+  * 语法格式如下
+    * `to="/path?参数名=值"`
+  * 对应页面组件接收传递过来的值
+    * `$route.query.参数名`
+
+* 动态路由传参
+
+  * 配置动态路由
+
+    ```javascript
+    // example
+    
+    const router = new VueRouter({
+        routes: [
+            ...,
+            {
+            	path: '/search/:words',
+            	component: Search
+            }
+        ]
+    })
+    ```
+
+  * 配置导航链接
+
+    * `to="/path/参数值"`
+
+  * 对应页面组件接收传递过来的值
+
+    * `$route.params.参数名`
+
+  * 如果不传参数，也希望匹配，可以加个可选符**"?"**
+
+
+
+
+
+
+
+# Vue路由
+
+## 重定向
+
+说明：重定向 -> 匹配**path**后，强制跳转**path**路径
+
+语法：`{ path: 匹配路径, redirect: 重定向到的路径 },`
+
+
+
+## 404
+
+作用：当路径找不到匹配时，给个提示页面
+
+位置：配在路由最后
+
+语法：`path:"*"`（任意路径） - 前面不匹配就命中最后这个
+
+
+
+## 模式设置
+
+* **hash**路由（默认）	例如：**http://localhost:8080/#/home**
+* **history**路由（常用）     例如：**http://localhost:8080/home** 
+
+```javascript
+const router = new VueRouter({
+    routes,
+    mode: "history"
+})
+```
+
+
+
+
+
+
+
+# 编程式导航 - 基本跳转
+
+编程式导航：用**JS**代码来进行跳转
+
+两种语法：
+
+* **path**路径跳转（简易方便）
+
+  ```javascript
+  this.$router.push(路由路径)
+  
+  this.$router.push({
+      path: '路由路径'
+  })
+  ```
+
+* **name**命名路由跳转（适合**path**路径长的场景）
+
+  ```javascript
+  { name: '路由名', path: '/path/xxx', component: XXX },
+  ```
+
   
