@@ -803,3 +803,51 @@ SELECT [列名列表] FROM 表名 WHERE 列名 = xxx;
 <img src="img/系统表空间6.png">
 
 <img src="img/系统表空间7.png">
+
+
+
+
+
+
+
+## 索引的创建与设计原则
+
+
+
+
+
+### 索引的声明与使用
+
+
+
+#### 索引的分类
+
+<img src="img/索引的分类.png">
+
+<img src="img/索引的分类3.png">
+
+<img src="img/索引的分类4.png">
+
+
+
+#### 创建索引
+
+<img src="img/创建索引.png">
+
+<img src="img/创建索引2.png">
+
+
+
+#### 删除索引
+
+```mysql
+SHOW INDEX FROM book5;
+
+# 方式1：ALTER TABLE ... DROP INDEX ...
+ALTER TABLE book5
+DROP INDEX idx_cmt;
+
+# 方式2：DROP INDEX ... ON ...
+DROP INDEX uk_idx_bname ON book5;
+```
+
