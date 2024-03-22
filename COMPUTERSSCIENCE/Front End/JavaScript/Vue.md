@@ -1355,4 +1355,134 @@ const router = new VueRouter({
   { name: '路由名', path: '/path/xxx', component: XXX },
   ```
 
-  
+
+
+
+
+
+
+
+# 编程式导航 - 路由传参
+
+两种传参方式：查询参数 + 动态路由传参
+
+两种跳转方式，对于两种传参方式都支持：
+
+1. **path**路径跳转传参
+
+   ```javascript
+   // example
+   this.$router.push({
+       path: '/search',
+       query: {
+           key: this.inpValue
+       }
+   })
+   
+   this.$router.push({
+       path: `/search/${this.inpValue}`
+   })
+   ```
+
+2. **name**命名路由跳转传参
+
+   ```javascript
+   // query传参
+   this.$router.push({
+       name: '路由名字',
+       query: {
+           参数名1: '参数值1',
+           参数名2: '参数值2'
+       }
+   })
+   
+   // 动态路由传参
+   this.$router.push({
+       name: '路由名字',
+       params: {
+           参数名: '参数值',
+       }
+   })
+   ```
+
+
+
+
+
+
+
+# 组件缓存 keep-alive
+
+**keep-alive**是**Vue**的内置组件，当包裹动态组件时，会缓存不活动的组件实例，而不是销毁它们
+
+**keep-alive**是一个抽象组件：自身不会渲染成一个**DOM**元素，也不会出现在父组件链中
+
+## 优点
+
+* 在组件切换过程中，把切换出去的组件保留在内存中，防止重复渲染**DOM**
+* 减少加载时间及性能消耗，提高用户体验性
+
+## 三个属性
+
+* **include**：组件名数组，只有匹配的组件会被缓存
+* **exclude**：组件名数组，任何匹配的组件都不会被缓存
+* **max**：最多可以缓存多少组件实例
+
+```html
+<!-- example -->
+<template>
+	<div class="h5-wrapper" :include="['LayoutPage']">
+        <keep-alive>
+            <router-view></router-view>
+        </keep-alive>
+    </div>
+</template>
+```
+
+
+
+
+
+
+
+# 自定义创建项目
+
+目标：基于**VueCli**自定义创建项目架子
+
+安装脚手架 -> 创建项目 -> 选择自定义
+
+```shell
+vue create 项目名
+```
+
+
+
+
+
+
+
+# ESLint 自动修正代码规范错误
+
+基于 **vscode** 插件 **ESLint** 高亮错误，并**通过配置自动**帮助**修复**错误
+
+```json
+// 在 vscode 设置中插入
+
+// 当保存时，eslint自动修复错误
+"editor.cdeActionsOnSave": {
+	"source.fixAll": true
+},
+// 保存代码，不自动格式化
+"editor.formatOnSave": false
+```
+
+
+
+
+
+
+
+# vuex
+
+**vuex**是一个插件，管理**vue**通用的数据（多组件共享的数据）
+
