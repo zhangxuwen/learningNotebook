@@ -849,5 +849,23 @@ DROP INDEX idx_cmt;
 
 # 方式2：DROP INDEX ... ON ...
 DROP INDEX uk_idx_bname ON book5;
+
+ALTER TABLE book5
+DROP COLUMN book_name;
 ```
 
+
+
+
+
+
+
+# MySQL8.0索引新特性
+
+## 支持降序索引
+
+<img src="img/支持降序索引.png">
+
+<img src="img/支持降序索引2.png">
+
+<img src="img/支持降序索引3.png">

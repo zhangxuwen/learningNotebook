@@ -1486,3 +1486,159 @@ vue create 项目名
 
 **vuex**是一个插件，管理**vue**通用的数据（多组件共享的数据）
 
+场景
+
+1. 某个状态在**很多个组件**来使用（个人信息）
+2. 多个组件**共同维护**一份数据（购物车）
+
+优势
+
+1. 共同维护一份数据，**数据集中化管理**
+2. 响应式变化
+3. 操作简洁（**vuex**提供了一些辅助函数）
+
+
+
+## 创建一个空仓库
+
+1. 安装**vuex**
+
+   ```shell
+   yarn add vuex@3 # 233/344
+   ```
+
+2. 新建**vuex**模块文件
+
+   新建**stroe/index.js**专门存放**vuex**
+
+3. 创建仓库
+
+   ```javascript
+   Vue.use(Vuex)
+   ```
+
+   创建仓库 **new Vuex.Store()**
+
+4. **main.js**导入挂载
+
+   在**main.js**中导入挂载到**Vue**实例上
+
+
+
+## 核心概念 - state 状态
+
+1. 提供数据
+
+   **State**提供唯一的公共数据源，所有共享的数据都要统一放到**Store**中的**State**中存储
+
+   在**state**对象中可以添加要共享的数据
+
+   ```javascript
+   // example
+   
+   // 创建仓库
+   const store = new Vuex.Store({
+       // state 状态，即数据，类似于vue组件中的data
+       // 区别
+       // data 是组件自己的数据
+       // state 是所有组件共享的数据
+       state: {
+           count: 101
+       }
+   })
+   ```
+
+2. 使用数据
+
+   1. 通过**store**直接访问
+
+      ```javascript
+      获取 store
+      1. this.$store
+      2. import 导入 store
+      
+      模板中：{{ $store.state.xxx }}
+      组件逻辑中：this.$store.state.xxx
+      JS模块中：store.state.xxx
+      ```
+
+   2. 通过辅助函数（简化）
+
+      **mapState**是辅助函数，帮助把**store**中的数据**自动**映射到组件的计算属性中
+
+      ```javascript
+      1. import {mapState} from 'vuex'
+      2. mapState(['count'])
+      3. computed: {
+         	...mapState(['count']) 
+         }
+      ```
+
+   
+
+## 核心概念 - mutations
+
+**state**数据的修改只能通过**mutations**
+
+1. 定义**mutations**对象，对象中存放修改**state**的方法
+
+   ```javascript
+   const store = new Vuex.Store({
+       state: {
+           count: 0
+       },
+       // 定义mutations
+       mutations: {
+           // 第一个参数是当前store的state属性
+           addCount (state) {
+               state.count += 1
+           }
+       }
+   })
+   ```
+
+2. 组件中提交调用**mutations**
+
+   ```javascript
+   this.$store.commit('addCount')
+   ```
+
+
+
+**mutations**传参语法
+
+提交**mutations**是可以传递参数的`this.$store.commit('xxx', 参数)`
+
+1. 提供**mutation**函数（带参数 - 提交载荷 **payload**）
+
+   ```javascript
+   mutations: {
+       ...
+       addCount (state, n) {
+           state.count += n
+       }
+   },
+   ```
+
+2. 页面中提交调用**mutation**
+
+   ```javascript
+   this.$store.commit('addCount', 10)
+   ```
+
+注意点：**mutation**参数有且只能有一个，如果需要多个参数，包装成一个对象
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
