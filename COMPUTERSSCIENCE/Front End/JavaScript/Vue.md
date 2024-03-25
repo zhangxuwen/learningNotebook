@@ -1628,9 +1628,166 @@ vue create 项目名
 
 注意点：**mutation**参数有且只能有一个，如果需要多个参数，包装成一个对象
 
+### 辅助函数：mapMutations
+
+**mapMutations**和**mapState**类似，它是把位于**mutations**中的方法提取了出来，映射到组件**methods**中
+
+```javascript
+mutations: {
+    subCount (state, n) {
+        state.count -= n
+    },
+}
+```
+
+```javascript
+import { mapMutations } from 'vuex'
+
+methods: {
+    ...mapMutations(['subCount'])
+}
+```
+
+```javascript
+this.subCount(10) 调用
+```
 
 
 
+
+
+## 核心概念 - actions
+
+说明：**mutations**必须是同步的（便于监测数据变化，记录调试）
+
+1. 提供**action**方法
+
+   ```javascript
+   actions: {
+       setAsyncCount(context, num) {
+           // 一秒后，给一个数，去修改 num
+           setTimeout(() => {
+               context.commit('changeCount', num)
+           }, 1000)
+       }
+   }
+   ```
+
+2. 页面中**dispatch**调用
+
+   ```javascript
+   this.$store.dispatch('setAsyncCount', 200)
+   ```
+
+### 辅助函数 - mapActions
+
+**mapActions**是位于**actions**中的方法提取了出来，映射到组件**methods**中
+
+```javascript
+actions: {
+    changeCountAction (context, num) {
+        setTimeout(() => {
+            context.commit('changeCount', num)
+        }, 1000)
+    }
+}
+```
+
+```javascript
+import { mapActions } from 'vuex'
+
+methods: {
+    ...mapActions(['changeCountAction'])
+}
+```
+
+```javascript
+this.changeCountAction(666) 调用
+```
+
+
+
+
+
+## 核心概念 - getters
+
+1. 定义**getters**
+
+   ```javascript
+   getters: {
+       // 注意
+       // （1） getters函数的第一个参数是 state
+       // （2） getters函数必须要有返回值
+       filterList (state) {
+           return state.list.filter(item => item > 5)
+       }
+   }
+   ```
+
+2. 访问**getters**
+
+   1. 通过**store**访问**getters**
+
+      ```javascript
+      {{ $store.getters.filterList }}
+      ```
+
+   2. 通过辅助函数**mapGetters**映射
+
+      ```javascript
+      computed: {
+          ...mapGetters(['filterList'])
+      },
+      ```
+
+      ```javascript
+      {{ filterList }}
+      ```
+
+
+
+
+
+## 核心概念 - 模块 module
+
+由于**vuex**使用**单一状态树**，应用的所有状态会**集中到一个比较大的对象**
+
+模块拆分
+
+example
+
+user模块：在**store/modules/user.js**
+
+```javascript
+// example
+
+const state = {
+    userInfo: {
+        age: 18
+    }
+}
+const mutations = {}
+const actions = {}
+const getters = {}
+export default {
+    state,
+    mutations,
+    actions,
+    getters
+}
+```
+
+```javascript
+// example
+
+import user from './modules/user'
+
+const store = new Vuex.Store({
+    modules: {
+        user
+    }
+})
+```
 
 
 
