@@ -1789,6 +1789,50 @@ const store = new Vuex.Store({
 })
 ```
 
+### 使用模块中的数据
+
+1. 直接通过模块名访问**$store.state.模块名.xxx**
+
+2. 通过**mapState**映射
+
+   * 默认根级别的映射 **mapState(['xxx'])**
+   * 子模块的映射 **mapState('模块名', ['xxx'])** - 需要开启命名空间
+
+   ```javascript
+   export default {
+       // 开启命名空间
+       namespace: true,
+       state,
+       mutations,
+       actions,
+       getters	
+   }
+   ```
+
+### 使用模块中 getters 中的数据
+
+1. 直接通过模块名访问 **$store.getters['模块名/xxx']**
+2. 通过 **mapGetters** 映射
+   * 默认根级别的映射 **mapGetters(['xxx'])**
+   * 子模块的映射 **mapGetters('模块名', ['xxx'])** - 需要开启命名空间
+
+### 掌握模块中 mutation 的调用语法
+
+注意：默认模块中的 **mutation** 和 **actions** 会被挂载到全局，**需要开启命名空间**，才会被挂载到子模块
+
+调用子模块中 **mutation**
+
+1. 直接通过 **store** 调用 **$store.commit('模块名/xxx', 额外参数)**
+2. 通过 **mapMutations** 映射
+   * 默认根级别的映射 **mapMutations(['xxx'])**
+   * 子模块的映射 **mapMutations('模块名', ['xxx'])** - 需要开启命名空间
+
+### 调用子模块中action
+
+1. 直接通过 **store** 调用 **$store.dispatch('模块名/xxx', 额外参数)**
+2. 通过 **mapActions** 映射
+   * 默认根级别的映射 **mapActions(['xxx'])**
+   * 子模块的映射 **mapActions('模块名', ['xxx'])**
 
 
 
@@ -1796,6 +1840,27 @@ const store = new Vuex.Store({
 
 
 
+# 调整初始化目录
+
+1. 删除多余的文件
+2. 修改路由配置和**App.vue**
+3. 新增两个目录**api**和**utils**
+   * **api**接口模块：发送**ajax**请求的接口模块
+   * **utils**工具模块：自己封装的一些工具方法模块
 
 
 
+
+
+
+
+# vant 组件库
+
+组件库：第三方**封装**好了组件，整合到一起就是一个组件库
+
+https://vant-contrib.gitee.io/vant/v2/#/zh-CN/
+
+一般会按照不同平台进行分类：
+
+1. PC端：**element-ui**（**element-plus**） **ant-design-vue**
+2. 移动端：**vant-ui** **Mint UI**（饿了么） **Cube UI**（滴滴）

@@ -85,6 +85,11 @@ CS --> DK(docker-k8s)
 DK --> docker_base
 
 
+CS --> game
+game --> godot
+game --> Game_Script
+
+
 
 math --> ML(Machine Learning)
 
