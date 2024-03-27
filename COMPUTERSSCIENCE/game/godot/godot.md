@@ -214,4 +214,137 @@ Engine.max_fps = 120
   	0.8f 表示每秒移动 0.8 单位
   ```
 
-  
+
+
+
+
+
+
+
+# process 和 physics_process
+
+* **godot**的**_process**相当于**unity**的**Update**
+
+  内部对代码就会在每一帧之前被执行，就是引擎每渲染一幅的画面之前，都会执行它里面的代码
+
+* **godot**的**_physics_process**相当于**unity**的**FixedUpdate**
+
+  内部代码会在每个物理帧之前被执行
+
+  **godot**的物理模拟时单独进行的，每次进行物理模拟之前都会执行**physics_process**中的代码
+
+
+
+
+
+
+
+# Parent 和 Owner
+
+* **Parent**
+  * 一个节点的**Parent**就是场景树上它的父级
+* **Owner**
+  * 如果不修改默认**Owner**的话，可以把它视为节点所在场景的顶部节点，如果该节点本身就是顶部节点那么它的**Owner**为**null**
+* 静态场景结构中默认的**Owner**
+
+* 动态创建的节点的**Owner**是**null**
+
+
+
+
+
+
+
+# 信号 signal
+
+* 信号是用来完成模块或功能之间通信的媒介，其实就是约定了一些方法的回调形式
+
+* 设计模式上叫做观察者设计模式
+
+* 第一种使用方法
+
+  ```python
+  # 第一种信号接受方法，通过场景中配置信号的接受方法
+  func _on_Button1_pressed():
+      print("hello button1")
+  ```
+
+* 第二种使用方法
+
+  ```python
+  # 第二种信号接受方法，通过代码控制信号的接受，更加的灵活，比较推荐方式
+  func _ready():
+      $Button2.connect("pressed", self, "onButton2")
+      
+  func onButton2():
+      print("button2 pressed")
+  ```
+
+
+
+## 自定义信号
+
+* 自定义信号
+
+  ```python
+  signal mySignal(a, b)
+  ```
+
+* 发送信号
+
+  ```python
+  emit_signal("mySignal", 1, 2)
+  ```
+
+* 解除绑定信号
+
+  ```python
+  disconnect("mySignal", 1, 2)
+  ```
+
+
+
+
+
+
+
+# 网络库支持await
+
+语法
+
+* `await + 对象.信号`
+
+
+
+
+
+
+
+# 多线程
+
+```python
+# example
+
+extends Button
+
+func _ready():
+    self.connect("pressed", self, "onButton2")
+    
+func onButton2():
+    var myThread = Thread.new()
+    
+    myThread.start(self, "threadTest", null, 0)
+    
+    print("Create Thread Id: ", myThread.get_id())
+    print("Thread Active: ", myThread.is_active())
+    
+    var waitForThread = myThread.wait_to_finish()
+    
+    print(waitForThread)
+    
+    
+    
+func threadTest():
+    return 999
+```
+

@@ -1864,3 +1864,99 @@ https://vant-contrib.gitee.io/vant/v2/#/zh-CN/
 
 1. PC端：**element-ui**（**element-plus**） **ant-design-vue**
 2. 移动端：**vant-ui** **Mint UI**（饿了么） **Cube UI**（滴滴）
+
+## vant 全部导入
+
+1. 安装 **vant-ui**
+
+   ```shell
+   npm i vant@latest-v2 -S
+   ```
+
+2. **main.js**中注册
+
+   ```javascript
+   import Vant from 'vant'
+   import 'vant/lib/index.css'
+   // 把 vant 中所有的组件都导入了
+   Vue.use(Vant)
+   ```
+
+3. 使用测试
+
+   ```html
+   <van-button type="primary">主要按钮</van-button>
+   <van-button type="info">信息按钮</van-button>
+   ```
+
+## vant 按需导入
+
+1. 安装 **vant-ui**
+
+   ```shell
+   npm i babel-plugin-import -D
+   ```
+
+2. 安装插件
+
+   ```shell
+   npm i babel-plugin-import -D
+   ```
+
+3. **babel.config.js** 中配置
+
+   ```javascript
+   module.exports = {
+       presets: [
+           '@vue/cli-plugin-babel/preset'
+       ],
+       plugins: [
+           ['import', {
+               libraryName: 'vant',
+               libraryDirectory: 'es',
+               style: true
+           }, 'vant']
+       ]
+   }
+   ```
+
+4. **main.js**按需导入注册
+
+   ```javascript
+   import Vue from 'vue'
+   import { Button } from 'vant'
+   
+   Vue.use(Button)
+   ```
+
+
+
+
+
+
+
+# 项目中的 vw 适配
+
+基于 **postcss** 插件 实现项目 **vw** 适配
+
+1. 安装插件
+
+   ```shell
+   yarn add postcss-px-to-viewport@1.1.1 -D
+   ```
+
+2. 根目录新建 **postcss.config.js** 文件，填入配置
+
+   ```javascript
+   // postcss.config.js
+   module.exports = {
+       plugins: {
+           'postcss-px-to-viewpport': {
+               // 标准屏宽度
+               viewportWidth: 375
+           }
+       }
+   }
+   ```
+
+   
