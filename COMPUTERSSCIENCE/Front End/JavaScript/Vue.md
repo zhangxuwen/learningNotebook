@@ -1970,3 +1970,89 @@ https://vant-contrib.gitee.io/vant/v2/#/zh-CN/
 
 但凡是单个页面，独立展示的，都是一级路由
 
+
+
+
+
+
+
+# api 接口模块
+
+封装**api**模块的好处
+
+1. 请求与页面逻辑分离
+2. 相同的请求可以直接复用
+3. 请求进行了统一管理
+
+
+
+
+
+
+
+# Toast 轻提示
+
+注册安装
+
+```javascript
+import { Toast } from 'vant'
+Vue.use(Toast)
+```
+
+两种使用方式
+
+1. 导入调用（组件内或非组件中均可）
+
+   ```javascript
+   import { Toast } from 'vant'
+   Toast('提示内容')
+   ```
+
+1. 通过**this**直接调用（必须组件内）
+
+   本质：将方法，注册挂载到了**Vue**原型上**Vue.prototype.$toast=xxx**
+   
+   ```javascript
+   this.$toast('提示内容')
+   ```
+   
+
+
+
+
+
+
+
+# 响应拦截器统一处理错误提示
+
+说明：响应拦截器是拿到数据的第一个数据流转站，可以在这里**统一处理错误**
+
+```javascript
+// example
+
+// 添加响应拦截器
+request.interceptors.response.use(function (respponse) {
+    const res = response.data
+    if (res.status !== 200) {
+        Toast(res.message)
+        return Promise.reject(res.message)
+    }
+    // 对响应数据做点什么
+    return res
+}, function (error) {
+    // 对响应错误做点什么
+    return Promise.reject(error)
+})
+```
+
+
+
+
+
+
+
+# 登录权证信息存储
+
+1. **token**存入**vuex**的好处，易获取，响应式
+2. **vuex**需要分模块 => **user** 模块
+
