@@ -2056,3 +2056,72 @@ request.interceptors.response.use(function (respponse) {
 1. **token**存入**vuex**的好处，易获取，响应式
 2. **vuex**需要分模块 => **user** 模块
 
+
+
+
+
+
+
+# storage 存储模块 - vuex 持久化处理
+
+```javascript
+// example
+
+const INFO_KEY = 'hm_shopping_info'
+// 获取个人信息
+export const getInfo = () => {
+    const result = localStorage.getItem(INFO_KEY)
+    return result ? JSON.parse(result) : { token: '', userId: '' }
+}
+// 设置个人信息
+export const setInfo = (info) => {
+    localStorage.setItem(INFO_KEY, JOSN.stringify(info))
+}
+// 移除个人信息
+export const removeInfo = () => {
+    localStorage.removeItem(INFO_KEY)
+}
+```
+
+实操步骤
+
+1. 请求拦截器中，每次请求，打开**loading**
+2. 响应拦截器中，每次响应，关闭**loading**
+
+
+
+
+
+
+
+# 页面访问拦截
+
+路由导航守卫 - **全局前置守卫**
+
+1. 所有的路由一旦被匹配到，都会先经过全局前置守卫
+2. 只有全局前置守卫放行，才会真正解析渲染组件，才能看到页面内容
+
+```javascript
+router.beforeEach((to, from, next) => {
+    // 1. to 往哪里去， 到哪去的路由信息对象
+    // 2. from 从哪里来， 从哪来的路由信息对象
+    // 3. next() 是否放行
+    // 	  如果next()调用，就是放行
+    //    next(路径) 拦截到某个路径页面
+})
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
