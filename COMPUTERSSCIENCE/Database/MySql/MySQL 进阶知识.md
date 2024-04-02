@@ -869,3 +869,46 @@ DROP COLUMN book_name;
 <img src="img/支持降序索引2.png">
 
 <img src="img/支持降序索引3.png">
+
+
+
+## 隐藏索引
+
+<img src="img/隐藏索引.png">
+
+
+
+
+
+
+
+# 适合创建索引的情况
+
+
+
+<img src="img/适合创建索引的情况.png">
+
+<img src="img/适合创建索引的情况2.png">
+
+<img src="img/适合创建索引的情况3.png">
+
+<img src="img/适合创建索引的情况4.png">
+
+<img src="img/适合创建索引的情况5.png">
+
+<img src="img/适合创建索引的情况6.png">
+
+<img src="img/适合创建索引的情况7.png">
+
+<img src="img/适合创建索引的情况8.png">
+
+<img src="img/适合创建索引的情况9.png">
+
+<img src="img/适合创建索引的情况10.png">
+
+<img src="img/适合创建索引的情况11.png">
+
+<img src="img/适合创建索引的情况12.png">
+
+
+
