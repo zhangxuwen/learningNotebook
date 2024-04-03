@@ -910,5 +910,32 @@ DROP COLUMN book_name;
 
 <img src="img/适合创建索引的情况12.png">
 
+<img src="img/适合创建索引的情况13.png">
+
+<img src="img/适合创建索引的情况14.png">
+
+<img src="img/适合创建索引的情况15.png">
+
+<img src="img/适合创建索引的情况16.png">
+
+<img src="img/适合创建索引的情况17.png">
 
 
+
+
+
+
+
+# 限制索引的数目
+
+<img src="img/限制索引的数目.png">
+
+
+
+
+
+
+
+# 不适合创建索引的情况
+
+<img src="img/不适合创建索引的情况.png">
