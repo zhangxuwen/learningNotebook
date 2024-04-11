@@ -964,3 +964,41 @@ DROP COLUMN book_name;
 
 <img src="img/查看系统性能参数.png">
 
+<img src="img/统计SQL的查询成本.png">
+
+<img src="img/统计SQL的查询成本2.png">
+
+<img src="img/统计SQL的查询成本3.png">
+
+<img src="img/定位执行慢的SQL.png">
+
+<img src="img/开启慢查询日志参数.png">
+
+<img src="img/开启慢查询日志参数2.png">
+
+<img src="img/开启慢查询日志参数3.png">
+
+<img src="img/查看慢查询数目.png">
+
+<img src="img/关闭慢查询日志.png">
+
+<img src="img/关闭慢查询日志2.png">
+
+<img src="img/删除慢查询日志.png">
+
+
+
+
+
+## 分析查询语句：EXPLAIN
+
+<img src="img/分析查询语句.png">
+
+
+
+
+
+
+
+
+

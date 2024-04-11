@@ -2161,6 +2161,115 @@ router.beforeEach((to, from, next) => {
 
 
 
+## 组合式API - setup选项
+
+
+
+### setup选项的写法和执行时机
+
+```html
+<script>
+    export default {
+        setup () {
+            
+        },
+        beforeCreate () {
+            
+        }
+    }
+</script>
+```
+
+
+
+
+
+## 组合式API - reactive和ref函数
+
+
+
+### reactive()
+
+作用：接受**对象类型数据的参数传入**并返回一个**响应式的对象**
+
+核心步骤
+
+```html
+<script setup>
+    // 导入
+    import { reactive } from 'vue'
+    
+    // 执行函数 传入参数 变量接收
+    const state = reactive(对象类型数据)
+    
+</script>
+```
+
+1. 从**vue**包中**导入reactive函数**
+2. 在**\<script setup>**中执行**reactive**函数并传入**类型为对象**的初始值，并使用变量接收返回值
+
+
+
+### ref()
+
+作用：接收**简单类型或者对象类型的数据**传入并返回一个**响应式的对象**
+
+核心步骤
+
+```html
+<script setup>
+    
+    // 导入
+    import { ref } from 'vue'
+    
+    // 执行函数 传入参数 变量接收
+    const count = ref(简单类型或者复杂类型数据)
+    
+</script>
+```
+
+1. 从**vue**包中**导入ref函数**
+2. 在**\<script setup>**中执行**ref**函数并传入初始值，使用**变量接收ref**函数的返回值
+
+
+
+
+
+## 组合式API - computed
+
+组合式**API**的计算属性**只是修改了写法**
+
+核心步骤
+
+1. **导入**computed函数
+2. **执行函数**在回调参数中**return基于响应式数据做计算的值**，用**变量接收**
+
+```html
+<script setup>
+    // 导入
+    import { computed } from 'vue'
+    // 执行函数 变量接收 在回调参数中return计算值
+    const computedState = computed(() => {
+        return 基于响应式数据做计算之后的值
+    })
+</script>
+```
+
+
+
+
+
+## 组合API - watch函数
+
+作用：侦听**一个或者多个数据**的变化，数据变化时执行回调函数
+
+两个额外参数
+
+1. immediate（立即执行）
+2. deep（深度侦听）
+
+
+
 
 
 
