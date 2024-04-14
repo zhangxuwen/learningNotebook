@@ -994,7 +994,7 @@ DROP COLUMN book_name;
 
 <img src="img/分析查询语句.png">
 
-
+<img src="img/分析查询语句2.png">
 
 
 

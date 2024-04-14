@@ -2268,11 +2268,409 @@ router.beforeEach((to, from, next) => {
 1. immediate（立即执行）
 2. deep（深度侦听）
 
+```html
+<script setup>
+	
+    // 1. 导入watch
+    import { ref, watch } from 'vue'
+    const count = ref(0)
+    
+    // 2. 调用 watch 侦听变化
+    watch(count, (newValue, oldValue) => {
+        console.log(`count发生了变化，老值为${oldValue}，新值为${newValue}`)
+    })
+    
+</script>
+```
+
+### 基础使用 - 侦听多个数据
+
+```html
+<script setup>
+
+    import { ref, watch } from 'vue'
+    const count = ref(0)
+    const name = ref('cp')
+    
+    // 侦听多个数据源
+    watch(
+        [count, name],
+        ([newCount, newName], [oldCount, oldName]) => {
+            console.log('count或者name变化了', [newCount, newName], [oldCount, oldName])
+        }
+    )
+    
+</script>
+```
+
+### immediate
+
+在侦听器创建时**立即触发回调**，响应式数据变化之后继续执行回调
+
+```javascript
+const count = ref(0)
+watch(count, () => {
+    console.log('count发送了变化')
+}, {
+    immediate: true
+})
+```
+
+### 精确侦听对象的某个属性
+
+```javascript
+const info = ref({
+    name: 'cp',
+    age: 18
+})
+
+watch(
+	() => info.value.age
+    () => console.log('age发送变化了')
+)
+```
 
 
 
 
 
+## Vue3的生命周期API
+
+| 选项式API                | 组合式API           |
+| ------------------------ | ------------------- |
+| **beforeCreate/created** | **setup**           |
+| beforeMount              | onBeforeMount       |
+| mounted                  | onMounted           |
+| beforeUpdate             | onBeforeUpdate      |
+| updated                  | onUpdated           |
+| **beforeUnmount**        | **onBeforeUnmount** |
+| **unmounted**            | **onUnmounted**     |
+
+
+
+
+
+## 组合式API - 父子通信
+
+基本思想
+
+1. 父组件中给**子组件绑定属性**
+2. 子组件内部通过**props选项接收**
+
+```vue
+<!-- App.vue -->
+<script setup>
+	// 引入子组件
+    import sonComVue from './son-com.vue'
+</script>
+
+<template>
+	<!-- 1. 绑定属性 message -->
+	<sonComVue message="this is app message"></sonComVue>
+</template>
+```
+
+```vue
+<!-- son-com.vue -->
+<script setup>
+	// 2. 通过 defineProps "编译器宏" 接收子组件传递的数据
+    const props = defineProps({
+        message: String
+    })
+</script>
+
+<template>
+	{{ message }}
+</template>
+```
+
+**defineProps** 原理：就是编译阶段的一个标识，实际编译器解析时，遇到后会进行编译转换
+
+
+
+
+
+## 组合式API下的子传父
+
+基本思想
+
+1. 父组件中给**子组件标签通过@绑定事件**
+2. 子组件内部通过**emit方法触发事件**
+
+```vue
+<!-- App.vue -->
+<script setup>
+	// 引入子组件
+    import sonComVue from './son-com.vue'
+    const getMessage = (msg) => {
+        console.log(msg)
+    }
+</script>
+
+<template>
+	<!-- 1. 绑定属性 message -->
+	<sonComVue @get-message="getMessage"></sonComVue>
+</template>
+```
+
+```vue
+<!-- son-com.vue -->
+<script setup>
+    
+	// 2. 通过 defineProps 编译器宏生成emit方法
+    const emit = defineEmits(['get-message'])
+
+    const sendMsg = () => {
+        // 触发自定义事件，并传递参数
+        emit('get-message', 'this is son msg')
+    }
+</script>
+
+<template>
+	<button @click="sendMsg">sendMsg</button>
+</template>
+```
+
+
+
+
+
+## 组合式API - 模板引用
+
+通过**ref标识**获取真实的**dom对象或者组件实例对象**
+
+使用
+
+1. 调用**ref**函数生成一个**ref**对象
+2. 通过**ref**标识绑定**ref**对象到标签
+
+```html
+<script setup>
+	import { ref } from 'vue'
+    // 1. 调用 ref 函数得到 ref 对象
+    const h1Ref = ref(null)
+</script>
+
+<template>
+	<!-- 2. 通过ref标识绑定ref对象 -->
+    <h1 ref="h1Ref">我是dom标签h1</h1>
+</template>
+```
+
+### defineExpose()
+
+默认情况下在**\<script setup>**语法糖下**组件内部的属性和方法是不开放**给父组件访问的，
+
+可以通过**defineExpose**编译宏**指定哪些属性和方法允许访问**
+
+
+
+
+
+## 组合式API - provide 和 inject
+
+作用和场景
+
+顶层组件向任意的底层组件**传递数据和方法**，实现**跨层组件通信**
+
+### 跨层传递普通数据
+
+1. 顶层组件通过**provide**函数提供数据
+2. 底层组件通过**inject**函数获取数据
+
+顶层组件
+
+```javascript
+provide('key', 顶层组件中的数据)
+```
+
+底层组件
+
+```javascript
+const message = inject('key')
+```
+
+### 跨层传递响应式数据
+
+在调用**provide**函数时，第二个参数设置为**ref**对象
+
+顶层组件
+
+```javascript
+provide('app-key', ref对象)
+```
+
+底层组件
+
+```javascript
+const message = inject('app-key')
+```
+
+### 跨层传递方法
+
+顶层组件可以向底层组件传递方法，**底层组件调用方法修改顶层组件中的数据**
+
+顶层组件
+
+```javascript
+const setCount = () => {
+    count.value ++
+}
+
+provide('setCount-key', setCount)
+```
+
+底层组件
+
+```javascript
+const setCount = inject('setCount-key')
+```
+
+
+
+
+
+## defineOptions
+
+主要是用来定义**Options API**的选项，可以用**defineOptions**定义任意的选项，**props**，**emits**，**expose**，**slots**除外
+
+
+
+
+
+## defineModel
+
+在**Vue3**中，自定义组件上使用**v-model**，相当于传递一个**modelValue**属性，同时触发**update:modelValue**事件
+
+```vue
+<Child v-model="isVisible"></Child>
+// 相当于
+<Child :modelValue="isVisible" @update:modelValue="isVisible=$event"></Child>
+```
+
+```vue
+<script setup>
+    import { defineModel } from 'vue'
+	const modelValue = defineModel()
+    modelVaue.value ++
+</script>
+```
+
+
+
+
+
+
+
+## Pinia
+
+**Pinia**是**Vue**的最新**状态管理工具**，是**Vuex**的**替代品**
+
+1. 提供更加简单的**API**（去掉了**mutation**）
+2. 提供符合，组合式风格的**API**（和**Vue3**新语法统一）
+3. 去掉了**modules**的概念，每一个**store**都是一个独立的模块
+4. 配合**TypeScript**更加友好，提供可靠的类型推断
+
+在实际开发项目的时候，关于**Pinia**的配置，可以在项目创建时自动添加
+
+或者手动添加**Pinia**到**Vue**项目
+
+1. 使用**Vite**创建一个空额**Vue3**项目
+
+   ```npm create vue@latest```
+
+2. 按照官方文档安装
+
+### 基本语法
+
+计数器案例
+
+1. 定义**store**
+
+   **Option Store**
+
+   与**Vue**的选项式**API**，也可以传入一个带有**state**、**actions**与**getters**属性的**Option**对象
+
+   ```javascript
+   export const useCounterStore = defineStore('counter', {
+       state: () => ({ count: 0 }),
+       getters: {
+           double: (state) => state.count * 2
+       },
+       actions: {
+           increment() {
+               this.count ++
+           },
+       },
+   })
+   ```
+
+   **Setup Store**
+
+   也存在另一种定义**store**的可用语法。与**Vue**组合式**API**的**setup**函数相似，可以传入一个函数，该函数定义了一些响应式属性和方法，并且返回了一个带有想暴露出去的属性和方法的对象
+
+   ```javascript
+   export const useCounterStore = defineStore('counter', () => {
+       const count = ref(0)
+       function increment() {
+           count.value ++
+       }
+       
+       return { count, increment }
+   })
+   ```
+
+   在**Setup Store**中
+
+   * **ref()** 就是 **state** 属性
+   * **computed()** 就是 **getters**
+   * **function()** 就是 **actions**
+
+2. 组件使用**store**
+
+### action异步实现
+
+```javascript
+// example
+
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
+import axios from 'axios'
+
+export const useChannelStore = defineStore('channel', () => {
+    // 声明数据
+    const channelList = ref([])
+    // 声明操作数据的方法
+    const getList = async () => {
+        // 支持异步
+        const { data: { data }} = await axios.get('xxx://xxx.xxx.xxx...')
+        channelList.value = data.channels
+        console.log(data.channels)
+    }
+    
+    // 声明getters相关
+    return {
+        channelList,
+        getList
+    }
+})
+```
+
+### Pinia持久化插件
+
+1. 安装插件**pinia-plugin-persistedstate**
+
+   ```npm i pinia-plugin-persistedstate```
+
+2. **main.js** 使用
+
+   ```javascript
+   import persist from 'pinia-plugin-persistedstate'
+   ...
+   app.use(createPinia().use(persist))
+   ```
+
+3. **store**仓库中，**persist: true** 开启（在第三个参数）
 
 
 
