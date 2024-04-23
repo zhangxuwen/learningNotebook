@@ -996,6 +996,240 @@ DROP COLUMN book_name;
 
 <img src="img/分析查询语句2.png">
 
+<img src="img/分析查询语句3.png">
+
+<img src="img/分析查询语句4.png">
+
+<img src="img/分析查询语句5.png">
+
+<img src="img/分析查询语句6.png">
+
+<img src="img/分析查询语句7.png">
+
+<img src="img/分析查询语句8.png">
+
+<img src="img/分析查询语句9.png">
+
+<img src="img/分析查询语句10.png">
+
+<img src="img/分析查询语句11.png">
+
+
+
+
+
+
+
+# 索引优化与查询优化
+
+
+
+
+
+## 索引失效案例
+
+<img src="img/索引优化与查询优化.png">
+
+<img src="img/索引优化与查询优化2.png">
+
+<img src="img/索引优化与查询优化3.png">
+
+<img src="img/索引优化与查询优化4.png">
+
+<img src="img/索引优化与查询优化5.png">
+
+<img src="img/索引优化与查询优化6.png">
+
+<img src="img/索引优化与查询优化7.png">
+
+<img src="img/索引优化与查询优化8.png">
+
+<img src="img/索引优化与查询优化9.png">
+
+<img src="img/索引优化与查询优化10.png">
+
+<img src="img/索引优化与查询优化11.png">
+
+<img src="img/索引优化与查询优化12.png">
+
+<img src="img/索引优化与查询优化13.png">
+
+<img src="img/索引优化与查询优化14.png">
+
+<img src="img/索引优化与查询优化15.png">
+
+<img src="img/索引优化与查询优化16.png">
+
+<img src="img/索引优化与查询优化17.png">
+
+<img src="img/索引优化与查询优化18.png">
+
+<img src="img/索引优化与查询优化19.png">
+
+<img src="img/索引优化与查询优化20.png">
+
+<img src="img/索引优化与查询优化21.png">
+
+<img src="img/索引优化与查询优化22.png">
+
+<img src="img/索引优化与查询优化23.png">
+
+<img src="img/索引优化与查询优化24.png">
+
+<img src="img/索引优化与查询优化25.png">
+
+<img src="img/索引优化与查询优化26.png">
+
+<img src="img/索引优化与查询优化27.png">
+
+<img src="img/索引优化与查询优化28.png">
+
+<img src="img/索引优化与查询优化29.png">
+
+<img src="img/索引优化与查询优化30.png">
+
+<img src="img/索引优化与查询优化31.png">
+
+<img src="img/索引优化与查询优化32.png">
+
+<img src="img/索引优化与查询优化33.png">
+
+<img src="img/索引优化与查询优化34.png">
+
+<img src="img/索引优化与查询优化35.png">
+
+<img src="img/索引优化与查询优化36.png">
+
+<img src="img/索引优化与查询优化37.png">
+
+<img src="img/索引优化与查询优化38.png">
+
+<img src="img/索引优化与查询优化39.png">
+
+<img src="img/索引优化与查询优化40.png">
+
+<img src="img/索引优化与查询优化41.png">
+
+<img src="img/索引优化与查询优化42.png">
+
+<img src="img/索引优化与查询优化43.png">
+
+<img src="img/索引优化与查询优化44.png">
+
+<img src="img/索引优化与查询优化45.png">
+
+<img src="img/索引优化与查询优化46.png">
+
+<img src="img/索引优化与查询优化47.png">
+
+<img src="img/索引优化与查询优化48.png">
+
+<img src="img/索引优化与查询优化49.png">
+
+<img src="img/索引优化与查询优化50.png">
+
+<img src="img/索引优化与查询优化51.png">
+
+<img src="img/索引优化与查询优化52.png">
+
+<img src="img/索引优化与查询优化53.png">
+
+<img src="img/索引优化与查询优化54.png">
+
+<img src="img/索引优化与查询优化55.png">
+
+<img src="img/索引优化与查询优化56.png">
+
+<img src="img/索引优化与查询优化57.png">
+
+<img src="img/索引优化与查询优化58.png">
+
+<img src="img/索引优化与查询优化59.png">
+
+
+
+
+
+
+
+# 范式
+
+<img src="img/范式.png">
+
+<img src="img/范式2.png">
+
+<img src="img/范式3.png">
+
+<img src="img/范式4.png">
+
+<img src="img/范式5.png">
+
+<img src="img/范式6.png">
+
+
+
+
+
+
+
+# 反范式化
+
+<img src="img/反范式化.png">
+
+<img src="img/反范式化2.png">
+
+<img src="img/反范式化3.png">
+
+
+
+
+
+
+
+# BCNF（巴斯范式）
+
+<img src="img/巴斯范式.png">
+
+
+
+
+
+
+
+# 第四范式
+
+<img src="img/第四范式.png">
+
+
+
+
+
+
+
+# 第五范式
+
+<img src="img/第五范式.png">
+
+
+
+
+
+
+
+# ER模型
+
+<img src="img/ER模型.png">
+
+<img src="img/ER模型2.png">
+
+<img src="img/ER模型3.png">
+
+<img src="img/ER模型4.png">
+
+
+
+
+
 
 
 
