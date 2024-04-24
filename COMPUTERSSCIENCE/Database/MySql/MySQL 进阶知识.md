@@ -1232,6 +1232,82 @@ DROP COLUMN book_name;
 
 
 
+# 设计原则
+
+<img src="img/设计原则.png">
+
+<img src="img/设计原则2.png">
+
+
+
+
+
+
+
+# 数据库调优
+
+<img src="img/数据库调优.png">
+
+<img src="img/数据库调优2.png">
+
+<img src="img/数据库调优3.png">
+
+<img src="img/数据库调优4.png">
+
+<img src="img/数据库调优5.png">
+
+<img src="img/数据库调优6.png">
+
+<img src="img/数据库调优7.png">
+
+<img src="img/数据库调优8.png">
+
+
+
+
+
+
+
+# 优化MySQL服务器
+
+<img src="img/优化MySQL服务器.png">
+
+<img src="img/优化MySQL服务器2.png">
+
+<img src="img/优化MySQL服务器3.png">
+
+<img src="img/优化MySQL服务器4.png">
+
+<img src="img/优化MySQL服务器5.png">
+
+<img src="img/优化MySQL服务器6.png">
+
+
+
+
+
+
+
+# 优化数据库结构
+
+<img src="img/优化数据库结构.png">
+
+<img src="img/优化数据库结构2.png">
+
+<img src="img/优化数据库结构3.png">
+
+<img src="img/优化数据库结构4.png">
+
+<img src="img/优化数据库结构5.png">
+
+<img src="img/优化数据库结构6.png">
+
+<img src="img/优化数据库结构7.png">
+
+<img src="img/优化数据库结构8.png">
+
+
+
 
 
 
