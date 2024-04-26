@@ -1306,6 +1306,134 @@ DROP COLUMN book_name;
 
 <img src="img/优化数据库结构8.png">
 
+<img src="img/优化数据库结构10.png">
+
+<img src="img/优化数据库结构11.png">
+
+<img src="img/优化数据库结构12.png">
+
+<img src="img/优化数据库结构13.png">
+
+<img src="img/优化数据库结构14.png">
+
+<img src="img/优化数据库结构15.png">
+
+<img src="img/优化数据库结构16.png">
+
+<img src="img/优化数据库结构17.png">
+
+<img src="img/优化数据库结构18.png">
+
+<img src="img/优化数据库结构19.png">
+
+<img src="img/优化数据库结构20.png">
+
+<img src="img/优化数据库结构21.png">
+
+<img src="img/优化数据库结构22.png">
+
+<img src="img/优化数据库结构23.png">
+
+<img src="img/优化数据库结构24.png">
+
+<img src="img/优化数据库结构25.png">
+
+<img src="img/优化数据库结构26.png">
+
+
+
+
+
+
+
+# 事务
+
+<img src="img/事务.png">
+
+<img src="img/事务2.png">
+
+<img src="img/事务4.png">
+
+<img src="img/事务5.png">
+
+<img src="img/事务6.png">
+
+<img src="img/事务7.png">
+
+<img src="img/事务8.png">
+
+<img src="img/事务9.png">
+
+<img src="img/事务10.png">
+
+<img src="img/事务11.png">
+
+<img src="img/事务12.png">
+
+<img src="img/事务13.png">
+
+<img src="img/事务14.png">
+
+<img src="img/事务15.png">
+
+<img src="img/事务16.png">
+
+<img src="img/事务17.png">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
