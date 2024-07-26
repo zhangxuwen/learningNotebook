@@ -1380,6 +1380,450 @@ DROP COLUMN book_name;
 
 <img src="img/事务17.png">
 
+<img src="img/事务18.png">
+
+<img src="img/事务22.png">
+
+<img src="img/事务23.png">
+
+<img src="img/事务24.png">
+
+<img src="img/事务25.png">
+
+<img src="img/事务26.png">
+
+<img src="img/事务27.png">
+
+<img src="img/事务28.png">
+
+<img src="img/事务29.png">
+
+<img src="img/事务30.png">
+
+<img src="img/事务31.png">
+
+<img src="img/事务32.png">
+
+<img src="img/事务33.png">
+
+<img src="img/事务34.png">
+
+<img src="img/事务35.png">
+
+<img src="img/事务36.png">
+
+<img src="img/事务37.png">
+
+<img src="img/事务38.png">
+
+<img src="img/事务39.png">
+
+<img src="img/事务40.png">
+
+<img src="img/事务19.png">
+
+<img src="img/事务20.png">
+
+<img src="img/事务21.png">
+
+
+
+
+
+
+
+# MySQL事务日志
+
+<img src="img/事务日志1.png">
+
+<img src="img/事务日志2.png">
+
+<img src="img/事务日志3.png">
+
+<img src="img/事务日志4.png">
+
+<img src="img/事务日志5.png">
+
+<img src="img/事务日志6.png">
+
+<img src="img/事务日志7.png">
+
+
+
+<img src="img/事务日志8.png">
+
+<img src="img/事务日志9.png">
+
+<img src="img/事务日志10.png">
+
+<img src="img/事务日志11.png">
+
+<img src="img/事务日志16.png">
+
+<img src="img/事务日志17.png">
+
+<img src="img/事务日志15.png">
+
+<img src="img/事务日志18.png">
+
+<img src="img/事务日志19.png">
+
+<img src="img/事务日志20.png">
+
+<img src="img/事务日志21.png">
+
+<img src="img/事务日志22.png">
+
+<img src="img/事务日志23.png">
+
+<img src="img/事务日志24.png">
+
+<img src="img/事务日志25.png">
+
+<img src="img/事务日志26.png">
+
+<img src="img/事务日志27.png">
+
+<img src="img/事务日志28.png">
+
+<img src="img/事务日志29.png">
+
+<img src="img/事务日志30.png">
+
+<img src="img/事务日志31.png">
+
+<img src="img/事务日志32.png">
+
+<img src="img/事务日志33.png">
+
+<img src="img/事务日志34.png">
+
+<img src="img/事务日志35.png">
+
+<img src="img/事务日志36.png">
+
+<img src="img/事务日志37.png">
+
+<img src="img/事务日志38.png">
+
+<img src="img/事务日志39.png">
+
+<img src="img/事务日志40.png">
+
+<img src="img/事务日志41.png">
+
+<img src="img/事务日志42.png">
+
+<img src="img/事务日志43.png">
+
+<img src="img/事务日志44.png">
+
+<img src="img/事务日志45.png">
+
+<img src="img/事务日志46.png">
+
+<img src="img/事务日志47.png">
+
+<img src="img/事务日志48.png">
+
+<img src="img/事务日志49.png">
+
+<img src="img/事务日志50.png">
+
+<img src="img/事务日志51.png">
+
+<img src="img/事务日志52.png">
+
+<img src="img/事务日志53.png">
+
+<img src="img/事务日志54.png">
+
+
+
+
+
+
+
+# 锁
+
+<img src="img/锁1.png">
+
+<img src="img/锁2.png">
+
+<img src="img/锁3.png">
+
+<img src="img/锁4.png">
+
+<img src="img/锁5.png">
+
+<img src="img/锁6.png">
+
+<img src="img/锁7.png">
+
+<img src="img/锁8.png">
+
+## 锁的不同角度分类
+
+<img src="img/锁9.png">
+
+<img src="img/锁11.png">
+
+<img src="img/锁10.png">
+
+<img src="img/锁12.png">
+
+<img src="img/锁13.png">
+
+<img src="img/锁14.png">
+
+<img src="img/锁15.png">
+
+<img src="img/锁16.png">
+
+<img src="img/锁17.png">
+
+<img src="img/锁18.png">
+
+<img src="img/锁19.png">
+
+<img src="img/锁20.png">
+
+<img src="img/锁21.png">
+
+<img src="img/锁22.png">
+
+<img src="img/锁23.png">
+
+<img src="img/锁24.png">
+
+<img src="img/锁25.png">
+
+<img src="img/锁26.png">
+
+<img src="img/锁27.png">
+
+<img src="img/锁28.png">
+
+<img src="img/锁29.png">
+
+<img src="img/锁30.png">
+
+<img src="img/锁31.png">
+
+<img src="img/锁32.png">
+
+<img src="img/锁33.png">
+
+<img src="img/锁34.png">
+
+<img src="img/锁35.png">
+
+<img src="img/锁36.png">
+
+<img src="img/锁37.png">
+
+<img src="img/锁38.png">
+
+<img src="img/锁39.png">
+
+<img src="img/锁40.png">
+
+<img src="img/锁41.png">
+
+<img src="img/锁43.png">
+
+<img src="img/锁44.png">
+
+<img src="img/锁45.png">
+
+<img src="img/锁46.png">
+
+<img src="img/锁47.png">
+
+<img src="img/锁48.png">
+
+<img src="img/锁49.png">
+
+<img src="img/锁50.png">
+
+<img src="img/锁51.png">
+
+<img src="img/锁52.png">
+
+<img src="img/锁53.png">
+
+<img src="img/锁54.png">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

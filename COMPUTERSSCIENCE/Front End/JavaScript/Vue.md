@@ -2680,6 +2680,18 @@ export const useChannelStore = defineStore('channel', () => {
 
 
 
+# pnpm 包管理升级
+
+```shell
+npm install -g pnpm
+```
+
+创建项目: ```pnpm create vue```
+
+安装依赖: ```pnpm``` install
+
+
+
 
 
 
