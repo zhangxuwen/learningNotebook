@@ -102,6 +102,8 @@ find / -name mysql
 
 
 
+
+
 ### 收回权限
 
 <img src = "img/收回权限.png">
@@ -116,7 +118,7 @@ find / -name mysql
 
 `角色是权限的集合`
 
-### 创建角色
+### 创建角色 
 
 <img src = "img/创建角色.png">
 
@@ -158,9 +160,7 @@ find / -name mysql
 
 
 
-
-
-
+​       
 
 ## 逻辑架构
 
@@ -262,7 +262,7 @@ show engines;
 
 
 
-
+<---读到这里--->
 
 ## 索引的数据结构
 
@@ -1653,6 +1653,62 @@ DROP COLUMN book_name;
 <img src="img/锁53.png">
 
 <img src="img/锁54.png">
+
+<img src="img/锁55.png">
+
+<img src="img/锁56.png">
+
+<img src="img/锁57.png">
+
+<img src="img/锁58.png">
+
+
+
+# MVCC
+
+<img src="img/MVCC1.png">
+
+<img src="img/MVCC2.png">
+
+<img src="img/MVCC3.png">
+
+<img src="img/MVCC4.png">
+
+<img src="img/MVCC5.png">
+
+<img src="img/MVCC6.png">
+
+<img src="img/MVCC7.png">
+
+## ReadView 的规则
+
+<img src="img/MVCC8.png"><img src="img/MVCC9.png">
+
+<img src="img/MVCC10.png">
+
+<img src="img/MVCC11.png">
+
+<img src="img/MVCC12.png">
+
+<img src="img/MVCC13.png">
+
+<img src="img/MVCC14.png">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
