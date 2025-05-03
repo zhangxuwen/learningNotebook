@@ -189,7 +189,59 @@ run进去容器，ctrl + p + q退出
 
 
 
+## 容器数据卷
+
+### 容器卷需要加入
+
+`--privileged=true`
+
+运行一个带有容器卷存储功能的容器实例
+
+### docker run -it --privileged=true -v /宿主机绝对路径目录:/容器内目录 镜像名
+
+### 读写规则映射添加说明
+
+1. 读写（默认）
+
+   **docker run -it --privileged=true -v /宿主机绝对路径目录:/容器内目录:rw 镜像名**
+
+2. 只读
+
+   **docker run -it --privileged=true -v /宿主机绝对路径目录:/容器内目录:ro 镜像名**
+
+   容器实例内部被限制，只能读取不能写
+
+### 容器继承
+
+####  docker run -it --privileged=true --volumes -from 父类 --name u2 ubuntu
 
 
 
+
+
+
+
+## docker 安装运行常见软件
+
+
+
+### MySQL 安装
+
+#### 1. docker pull mysql（:版本号）
+
+#### 2. docker run -p 主机端口:容器端口 -e MYSQL_ROOT_PASSWORD=指定密码 -d mysql（:版本号）
+
+#### 数据卷备份：docker run -d -p 主机端口:容器端口 --privileged=true -v /xxx/mysql/log:/var/log/mysql -v /xxx/mysql/data:/var/lib/mysql -v /xxx/mysql/conf:/etc/mysql/conf.d -e MYSQL_ROOT_PASSWORD=指定密码  --name 指定名称 mysql（:版本号）
+
+
+
+### redis安装
+
+#### 1. docker pull redis（:版本号）
+
+#### 2.  在宿主机下新建目录 /app/redis
+
+#### 3. 将一个redis.conf文件模板拷贝进/app/redis目录下
+
+#### docker run  -p 主机端口:容器端口 -name 指定名称 --privileged=true -v /app/redis/redis.conf:/etc/redis/redis.conf -v /app/redis/data:/data -d redis（:版本号） redis-server /etc/redis/redis.conf
 
